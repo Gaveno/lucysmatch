@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUCY'S MATCH</title>
+  <!-- Playful font -->
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --pastel-1: #ffd6e0;
+      --pastel-2: #cde7f0;
+      --pastel-3: #f9e79f;
+      --accent: #ff6b81;
+      --text: #4a2b3b;
+    }
+    * { box-sizing: border-box; padding: 0; margin: 0; }
+    body {
+      font-family: 'Baloo 2', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(255,215,240,0.35), transparent 15%),
+                  radial-gradient(1000px 500px at 90% 90%, rgba(200,235,255,0.28), transparent 20%),
+                  linear-gradient(180deg, #fffaf0, #fef6f7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: var(--text);
+    }
+    .container {
+      max-width: 600px;
+      width: 100%;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--accent);
+      font-size: 40px;
+      letter-spacing: 1px;
+      /* gradient text */
+      background: linear-gradient(90deg,#ff85a1,#ffd28f,#8fd3ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 6px rgba(255,107,129,0.08);
+    }
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    /* Start modal styles */
+    .start-modal{ position: fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:10001; background: rgba(0,0,0,0.35); }
+    .start-content{ background: linear-gradient(180deg,#fff,#fff8fb); padding:26px 28px; border-radius:12px; text-align:center;}
+    .start-content h2{font-size:26px;margin-bottom:12px;color:#ff6b81}
+    .start-content .options button{ margin:6px; padding:12px 16px; border-radius:10px; border:none; background:linear-gradient(180deg,#ffd6e0,#ffb6b9); font-size:16px; cursor:pointer}
+    .start-content .options button:nth-child(2){ background:linear-gradient(180deg,#cde7f0,#9fd6ff)}
+    .start-content .options button:nth-child(3){ background:linear-gradient(180deg,#fff2b6,#ffd28f)}
+    .card {
+      background: linear-gradient(180deg,var(--pastel-1), var(--pastel-2));
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      perspective: 1000px;
+      box-shadow: 0 8px 18px rgba(75,0,60,0.06);
+      transition: transform 160ms ease;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      padding-top: 100%; /* square aspect ratio */
+      transition: transform 0.5s cubic-bezier(.2,.9,.3,1);
+      transform-style: preserve-3d;
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 48px; /* bigger for kids */
+      font-weight: 700;
+    }
+    .card-front {
+      background: linear-gradient(180deg,#b7f0e6,#a3d2ca); /* pastel blue */
+      transform: rotateY(180deg);
+      border: 4px solid rgba(74,43,59,0.08);
+      color: #2b2b2b;
+    }
+    .card-back {
+      background: linear-gradient(180deg,#ffd6e0,#ffb6b9); /* pastel pink */
+      color: #4a2b3b;
+      font-size: 42px;
+    }
+    /* New keyframes for match effect */
+    @keyframes matchPulse {
+      0% { transform: scale(1); box-shadow: none; }
+      50% { transform: scale(1.18); box-shadow: 0 10px 30px rgba(255,107,129,0.25); }
+      100% { transform: scale(1); box-shadow: none; }
+    }
+    .card.matched {
+      animation: matchPulse 0.5s ease-in-out;
+    }
+    .card:active { transform: translateY(2px) scale(0.995); }
+    .card:hover { transform: translateY(-6px) scale(1.02); }
+    /* New Confetti styles */
+    #confetti-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 9999;
+    }
+    @keyframes confettiExplosion {
+      0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+      50% { transform: translate(var(--dx), var(--dy)) rotate(180deg); opacity: 1; }
+      100% { transform: translate(var(--dx), calc(var(--dy) + 200px)) rotate(360deg); opacity: 0; }
+    }
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 12px;
+      background-color: red;
+      opacity: 0.95;
+      animation: confettiExplosion 2.2s cubic-bezier(.1,.8,.2,1) forwards;
+      transform-origin: center;
+      border-radius: 3px;
+    }
+    /* New styles for star icons in result modal */
+    .star {
+      font-size: 90px; /* bigger, more playful */
+      background: radial-gradient(circle at 30% 30%, #fffacd, #ffd700 40%, #ffb84d 70%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 8px 18px rgba(255,150,100,0.12);
+      margin: 0 14px;
+      opacity: 0;
+      animation: fadeIn 0.45s forwards, breathe 2s ease-in-out infinite;
+      display: inline-block;
+      transform-origin: center center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes breathe {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+      100% { transform: scale(1); }
+    }
+    /* Modal styles for result */
+    #resultModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10000;
+    }
+    #resultModal.show {
+      visibility: visible;
+      opacity: 1;
+    }
+    #resultModal .modal-content {
+      background: linear-gradient(180deg,#ffffff,#fff6f9);
+      padding: 44px 34px; /* larger modal */
+      border-radius: 16px;
+      text-align: center;
+      min-width: 380px;
+      min-height: 260px;
+      box-shadow: 0 30px 60px rgba(74,43,59,0.08);
+    }
+    /* Fun sparkle dots behind modal */
+    #resultModal.show::before{
+      content: '';
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle at 20% 20%, rgba(255,223,186,0.6), transparent 15%),
+                  radial-gradient(circle at 80% 80%, rgba(199,245,255,0.6), transparent 15%);
+      border-radius: 50%;
+      filter: blur(26px);
+      z-index: 9998;
+      transform: translateY(-10px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>LUCY'S MATCH</h1>
+    <div class="game-board" id="gameBoard">
+      <!-- Cards will be injected by JS -->
+    </div>
+  </div>
+  <!-- New elements for confetti and result modal -->
+  <div id="confetti-container"></div>
+  <div id="resultModal" onclick="restartGame()" style="cursor:pointer;">
+    <div class="modal-content">
+      <h2 id="resultTitle">Game Over!</h2>
+      <p id="starResult"></p>
+    </div>
+  </div>
+  <!-- Start modal element -->
+  <div class="start-modal" id="startModal">
+    <div class="start-content">
+      <h2>Welcome to Lucy's Match!</h2>
+      <div class="options">
+        <button id="easyBtn">Easy</button>
+        <button id="mediumBtn">Medium</button>
+        <button id="hardBtn">Hard</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // New score tracking variables
+    let misses = 0;
+    let matchesFound = 0;
+
+    // Master emoji list
+    const masterSymbols = ['🐶','🐱','🦄','🐼','🐵','🐤','🐸','🐙','🍰','🧸','🍓','🌈','🐯','🐻','🦊','🐝'];
+    let cards = [];
+    let activeSymbols = [];
+
+    // Fisher-Yates shuffle
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    const gameBoard = document.getElementById('gameBoard');
+    let firstCard = null;
+    let lockBoard = false;
+
+    // Initialize or restart the game by building the board with cardCount total cards
+    function initGame(cardCount) {
+      misses = 0;
+      matchesFound = 0;
+      firstCard = null;
+      lockBoard = false;
+      const pairCount = cardCount / 2;
+      const shuffledMaster = shuffle([...masterSymbols]);
+      activeSymbols = shuffledMaster.slice(0, pairCount);
+      cards = shuffle([...activeSymbols, ...activeSymbols]);
+      gameBoard.innerHTML = '';
+      cards.forEach(symbol => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-front">${symbol}</div>
+            <div class="card-back"></div>
+          </div>
+        `;
+        card.dataset.symbol = symbol;
+        card.addEventListener('click', onCardClick);
+        gameBoard.appendChild(card);
+      });
+    }
+
+    function startGame(cardCount){
+      document.getElementById('startModal').style.display = 'none';
+      initGame(cardCount);
+    }
+
+    function onCardClick(e) {
+      if (lockBoard) return;
+      const card = e.currentTarget;
+      if (card.classList.contains('flipped')) return;
+
+      card.classList.add('flipped');
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      if (firstCard.dataset.symbol === card.dataset.symbol) {
+        // Match found: trigger effects
+        firstCard.classList.add('matched');
+        card.classList.add('matched');
+        // Trigger confetti effect at card position
+        const rect = card.getBoundingClientRect();
+        confettiEffect(rect.left + rect.width/2, rect.top + rect.height/2);
+        matchesFound++;
+        // Reset selection
+        firstCard = null;
+        // Check if game over (all matches found for the current difficulty)
+        if (matchesFound === activeSymbols.length) {
+          showResult();
+        }
+        return;
+      }
+
+      lockBoard = true;
+      setTimeout(() => {
+        card.classList.remove('flipped');
+        firstCard.classList.remove('flipped');
+        firstCard = null;
+        lockBoard = false;
+        // Increment miss count on mismatch
+        misses++;
+      }, 1000);
+    }
+
+    // Updated function: Confetti effect with explosive, gravity-pulled particles
+    function confettiEffect(x, y) {
+      const confettiContainer = document.getElementById('confetti-container');
+      const colors = ['#FFC0CB', '#FFD700', '#ADFF2F', '#87CEFA', '#FFB6C1', '#FF9BCB', '#B6FFD2'];
+      for (let i = 0; i < 40; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('confetti');
+        const color = colors[Math.floor(Math.random()*colors.length)];
+        particle.style.backgroundColor = color;
+        // random shape
+        if (Math.random() > 0.6) particle.style.width = '6px', particle.style.height = '6px', particle.style.borderRadius = '50%';
+        else if (Math.random() > 0.4) particle.style.width = '10px', particle.style.height = '6px';
+        // random angle and distance
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = 120 + Math.random() * 220;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance * -1; // bias upward initially
+        particle.style.setProperty('--dx', dx + 'px');
+        particle.style.setProperty('--dy', dy + 'px');
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        // rotation
+        particle.style.transform = `rotate(${Math.random()*360}deg)`;
+        confettiContainer.appendChild(particle);
+        setTimeout(() => { particle.remove(); }, 2600 + Math.random()*800);
+      }
+    }
+
+    function randomColor() {
+      const colors = ['#FFC0CB', '#FFD700', '#ADFF2F', '#87CEFA', '#FFB6C1'];
+      return colors[Math.floor(Math.random()*colors.length)];
+    }
+
+    // Updated function: Show result modal with animated star icons displayed one at a time
+    function showResult() {
+      // Relaxed thresholds: easier to reach higher star ratings
+      let stars = 1;
+      if (misses <= 6) {
+        // 3 stars for 6 or fewer misses
+        stars = 3;
+      } else if (misses <= 10) {
+        // 2 stars for 7-10 misses
+        stars = 2;
+      }
+      // Set congratulatory title based on performance
+      const titleEl = document.getElementById('resultTitle');
+      if (stars === 3) titleEl.textContent = 'AWESOME!';
+      else if (stars === 2) titleEl.textContent = 'GREAT!';
+      else titleEl.textContent = 'NICE!';
+
+      const starContainer = document.getElementById('starResult');
+      starContainer.innerHTML = '';
+      let count = 0;
+      const addStar = () => {
+         if (count < stars) {
+             const star = document.createElement('span');
+             star.classList.add('star');
+             star.innerHTML = '★';
+             starContainer.appendChild(star);
+             count++;
+             setTimeout(addStar, 700);
+         }
+      };
+      addStar();
+      document.getElementById('resultModal').classList.add('show');
+    }
+
+    // Restart game when modal is clicked
+    function restartGame() {
+      document.getElementById('resultModal').classList.remove('show');
+      document.getElementById('confetti-container').innerHTML = '';
+      document.getElementById('startModal').style.display = 'flex';
+    }
+
+    // Difficulty button event listeners
+    document.getElementById('easyBtn').addEventListener('click', () => { startGame(8); });
+    document.getElementById('mediumBtn').addEventListener('click', () => { startGame(12); });
+    document.getElementById('hardBtn').addEventListener('click', () => { startGame(16); });
+
+    // Start first game
+    // initGame(); // No auto-start, wait for user to select difficulty
+  </script>
+</body>
+</html>
