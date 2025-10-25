@@ -1,0 +1,18 @@
+{
+  "name": "lucysmatch-tests",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "jsdom": "^27.0.1"
+  },
+  "overrides": {
+    "glob": "10.4.5"
+  },
+  "dependencies": {
+    "jest-environment-jsdom": "^30.2.0"
+  }
+}
