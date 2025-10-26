@@ -5,11 +5,25 @@ const masterSymbols = ['🐶','🐱','🦄','🐼','🐵','🐤','🐸','🐙','
 let cards = [];
 let activeSymbols = [];
 let firstCard = null;
+let secondCard = null;
 let lockBoard = false;
+let mismatchTimeout = null; // Track the setTimeout for mismatch delay
 let mismatchDelay = 100; // milliseconds; tests use a short delay by default
 let gameBoard = null;
 let _focusTrapHandler = null;
 let _lastFocusedElement = null;
+
+// Game mode and scoring state
+let gameMode = 'classic'; // classic, timed, blitz
+let score = 0;
+let combo = 0;
+let maxCombo = 0;
+let lastMatchTime = null;
+let comboWindow = 3000; // ms to maintain combo
+let timerInterval = null;
+let timeRemaining = 0;
+let gameStartTime = null;
+let isPaused = false;
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -27,11 +41,32 @@ function initGame(cardCount) {
   misses = 0;
   matchesFound = 0;
   firstCard = null;
+  secondCard = null;
   lockBoard = false;
+  mismatchTimeout = null;
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  lastMatchTime = null;
+  gameStartTime = Date.now();
+  isPaused = false;
+  
   const pairCount = cardCount / 2;
   const shuffledMaster = shuffle([...masterSymbols]);
   activeSymbols = shuffledMaster.slice(0, pairCount);
   cards = shuffle([...activeSymbols, ...activeSymbols]);
+  
+  // Initialize timer for timed/blitz modes
+  if (gameMode === 'timed') {
+    timeRemaining = 120; // 2 minutes for timed mode
+    startTimer();
+  } else if (gameMode === 'blitz') {
+    timeRemaining = 60; // 1 minute for blitz mode
+    startTimer();
+  }
+  
+  updateHUD();
+  
   if (!gameBoard) return;
   gameBoard.innerHTML = '';
   cards.forEach(symbol => {
@@ -60,7 +95,8 @@ function initGame(cardCount) {
   });
 }
 
-function startGame(cardCount) {
+function startGame(cardCount, mode = 'classic') {
+  gameMode = mode;
   const startModal = document.getElementById('startModal');
   if (startModal) startModal.style.display = 'none';
   // release focus trap for start modal when game starts
@@ -71,17 +107,45 @@ function startGame(cardCount) {
 }
 
 function onCardClick(e) {
-  if (lockBoard) return;
+  if (isPaused) return;
   const card = e.currentTarget;
   if (card.classList.contains('flipped')) return;
 
+  // If board is locked (cards flipping back), immediately resolve the mismatch and process this click
+  if (lockBoard) {
+    // Clear any pending timeout so it doesn't flip cards later
+    if (mismatchTimeout) {
+      clearTimeout(mismatchTimeout);
+      mismatchTimeout = null;
+    }
+    
+    // Flip back the specific mismatched cards (not the new card being clicked)
+    if (firstCard && secondCard) {
+      firstCard.classList.remove('flipped');
+      secondCard.classList.remove('flipped');
+      misses++;
+      combo = 0;
+      updateHUD();
+    }
+    // Reset state completely
+    firstCard = null;
+    secondCard = null;
+    lockBoard = false;
+  }
+
+  // NOW flip the new card (after old ones are flipped back)
   card.classList.add('flipped');
   // Update aria label when revealed
   card.setAttribute('aria-label', `Revealed card ${card.dataset.symbol}`);
+  
+  // If no first card, this becomes the first card
   if (!firstCard) {
     firstCard = card;
     return;
   }
+
+  // This is the second card
+  secondCard = card;
 
   if (firstCard.dataset.symbol === card.dataset.symbol) {
     firstCard.classList.add('matched');
@@ -89,20 +153,49 @@ function onCardClick(e) {
     // small vibration on match (mobile)
     if (navigator.vibrate) navigator.vibrate(60);
     matchesFound++;
+    
+    // Calculate combo and score
+    const now = Date.now();
+    if (lastMatchTime && (now - lastMatchTime) < comboWindow) {
+      combo++;
+    } else {
+      combo = 1;
+    }
+    maxCombo = Math.max(maxCombo, combo);
+    lastMatchTime = now;
+    
+    // Award points: base + combo multiplier
+    const basePoints = 100;
+    const comboBonus = combo > 1 ? (combo - 1) * 50 : 0;
+    const points = basePoints + comboBonus;
+    score += points;
+    
+    // Show combo if > 1
+    if (combo > 1) showComboPopup(combo, points);
+    
+    updateHUD();
+    
     firstCard = null;
+    secondCard = null;
     if (matchesFound === activeSymbols.length) {
+      stopTimer();
       showResult();
     }
     return;
   }
 
   lockBoard = true;
-  setTimeout(() => {
-    card.classList.remove('flipped');
-    firstCard.classList.remove('flipped');
+  mismatchTimeout = setTimeout(() => {
+    if (secondCard) secondCard.classList.remove('flipped');
+    if (firstCard) firstCard.classList.remove('flipped');
     firstCard = null;
+    secondCard = null;
     lockBoard = false;
+    mismatchTimeout = null;
     misses++;
+    // Reset combo on mismatch
+    combo = 0;
+    updateHUD();
     // vibration on mismatch
     if (navigator.vibrate) navigator.vibrate([30,20,30]);
   }, mismatchDelay);
@@ -110,6 +203,96 @@ function onCardClick(e) {
 
 function confettiEffect(x, y) {
   // no-op in tests
+}
+
+// Timer system
+function startTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (isPaused) return;
+    timeRemaining--;
+    updateHUD();
+    if (timeRemaining <= 0) {
+      stopTimer();
+      showResult();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function pauseGame() {
+  isPaused = true;
+}
+
+function resumeGame() {
+  isPaused = false;
+}
+
+// HUD updates
+function updateHUD() {
+  const scoreEl = document.getElementById('gameScore');
+  const timerEl = document.getElementById('gameTimer');
+  const comboEl = document.getElementById('gameCombo');
+  
+  if (scoreEl) scoreEl.textContent = score.toString();
+  
+  if (timerEl && (gameMode === 'timed' || gameMode === 'blitz')) {
+    const mins = Math.floor(timeRemaining / 60);
+    const secs = timeRemaining % 60;
+    timerEl.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    // Warning color when low on time
+    if (timeRemaining <= 10) {
+      timerEl.style.color = 'var(--accent)';
+    }
+  }
+  
+  if (comboEl) {
+    if (combo > 1) {
+      comboEl.textContent = `×${combo} COMBO!`;
+      comboEl.style.opacity = '1';
+    } else {
+      comboEl.style.opacity = '0';
+    }
+  }
+}
+
+// Show combo popup animation
+function showComboPopup(comboCount, points) {
+  if (typeof document === 'undefined') return;
+  const popup = document.createElement('div');
+  popup.className = 'combo-popup';
+  popup.textContent = `×${comboCount} +${points}`;
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1000);
+}
+
+// Calculate final score with bonuses
+function calculateFinalScore() {
+  let finalScore = score;
+  
+  // Time bonus for timed/blitz modes
+  if ((gameMode === 'timed' || gameMode === 'blitz') && timeRemaining > 0) {
+    const timeBonus = timeRemaining * 10;
+    finalScore += timeBonus;
+  }
+  
+  // Perfect game bonus (no misses)
+  if (misses === 0) {
+    finalScore += 1000;
+  }
+  
+  // Max combo bonus
+  if (maxCombo >= 3) {
+    finalScore += maxCombo * 100;
+  }
+  
+  return finalScore;
 }
 
 function trapFocus(modal) {
@@ -171,16 +354,30 @@ function restartGame() {
   if (modal) modal.classList.remove('show');
   const confettiContainer = document.getElementById('confetti-container');
   if (confettiContainer) confettiContainer.innerHTML = '';
-  const startModal = document.getElementById('startModal');
-  if (startModal) startModal.style.display = 'flex';
-  // trap focus inside start modal so keyboard users can pick a difficulty
-  if (startModal) trapFocus(startModal);
+  
+  // Hide HUD
+  const hud = document.getElementById('gameHUD');
+  if (hud) hud.classList.remove('active');
+  
+  // Return to title screen instead of start modal
+  const titleScreen = document.getElementById('titleScreen');
+  if (titleScreen) titleScreen.style.display = 'flex';
+  
   const starContainer = document.getElementById('starResult');
   if (starContainer) starContainer.innerHTML = '';
   const titleEl = document.getElementById('resultTitle');
   if (titleEl) titleEl.textContent = 'Game Over!';
   const announcer = document.getElementById('sr-announcer');
   if (announcer) announcer.textContent = '';
+  
+  // Reset game state
+  stopTimer();
+  gameMode = 'classic';
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  timeRemaining = 0;
+  updateHUD();
 }
 
 function setMismatchDelay(ms) {
@@ -290,6 +487,9 @@ function announceTheme(theme) {
 }
 
 function showResult() {
+  // Calculate final score with bonuses
+  const finalScore = calculateFinalScore();
+  
   // Determine star rating based on misses
   const stars = getStarRating(misses);
 
@@ -300,6 +500,15 @@ function showResult() {
 
   const titleEl = document.getElementById('resultTitle');
   if (titleEl) titleEl.textContent = title;
+  
+  // Show score in result modal
+  const scoreEl = document.getElementById('finalScore');
+  if (scoreEl) {
+    scoreEl.textContent = `Score: ${finalScore}`;
+    if (maxCombo > 1) {
+      scoreEl.textContent += ` | Max Combo: ×${maxCombo}`;
+    }
+  }
 
   const starContainer = document.getElementById('starResult');
   if (starContainer) {
@@ -339,6 +548,13 @@ if (typeof module !== 'undefined' && module.exports) {
     toggleTheme,
     getTheme,
     initTheme,
+    // game modes & scoring
+    startTimer,
+    stopTimer,
+    pauseGame,
+    resumeGame,
+    updateHUD,
+    calculateFinalScore,
     // expose internals for assertions
     _internals,
     restartGame,
@@ -362,6 +578,13 @@ if (typeof window !== 'undefined') {
   window.toggleTheme = toggleTheme;
   window.getTheme = getTheme;
   window.initTheme = initTheme;
+  // game modes & scoring
+  window.startTimer = startTimer;
+  window.stopTimer = stopTimer;
+  window.pauseGame = pauseGame;
+  window.resumeGame = resumeGame;
+  window.updateHUD = updateHUD;
+  window.calculateFinalScore = calculateFinalScore;
   window.restartGame = restartGame;
   window.setMismatchDelay = setMismatchDelay;
   window.getStarRating = getStarRating;
