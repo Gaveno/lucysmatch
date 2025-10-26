@@ -688,6 +688,45 @@ function showResult() {
   // Calculate final score with bonuses
   const finalScore = calculateFinalScore();
   
+  // Calculate game duration
+  const gameEndTime = Date.now();
+  const timeElapsed = gameStartTime ? (gameEndTime - gameStartTime) / 1000 : 0;
+  
+  // Record game completion for progression system (if available in browser)
+  if (typeof window !== 'undefined' && window.playerState) {
+    const gameData = {
+      mode: gameMode,
+      difficulty: currentCardCount === 8 ? 'easy' : (currentCardCount === 12 ? 'medium' : 'hard'),
+      score: finalScore,
+      mistakes: misses,
+      timeElapsed: timeElapsed,
+      timeRemaining: timeRemaining,
+      maxCombo: maxCombo,
+      matches: matchesFound,
+      boardsCompleted: boardsCompleted
+    };
+    
+    const progressResult = window.playerState.recordGame(gameData);
+    
+    // Show achievement notifications
+    if (progressResult.newAchievements && progressResult.newAchievements.length > 0) {
+      progressResult.newAchievements.forEach((achievement, index) => {
+        setTimeout(() => {
+          if (typeof window.showAchievementNotification === 'function') {
+            window.showAchievementNotification(achievement);
+          }
+        }, index * 500); // Stagger notifications
+      });
+    }
+    
+    // Show level up notification
+    if (progressResult.leveledUp && typeof window.showLevelUpNotification === 'function') {
+      setTimeout(() => {
+        window.showLevelUpNotification(progressResult.level);
+      }, progressResult.newAchievements.length * 500 + 500);
+    }
+  }
+  
   // Determine star rating based on performance
   let stars;
   if (gameMode === 'timed') {

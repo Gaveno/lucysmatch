@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="css/hud.css">
   <link rel="stylesheet" href="css/modals.css">
   <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/progression.css">
 </head>
 <body>
   <button id="themeToggle" aria-pressed="false" aria-label="Toggle theme">🌙</button>
@@ -81,6 +82,16 @@
           <span class="mode-desc">Max combos!</span>
         </button>
       </div>
+      <div class="progress-buttons">
+        <button class="progress-btn" id="showAchievementsBtn">
+          <span class="progress-btn-icon">🏆</span>
+          <span>Achievements</span>
+        </button>
+        <button class="progress-btn" id="showHighScoresBtn">
+          <span class="progress-btn-icon">📊</span>
+          <span>High Scores</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -132,6 +143,68 @@
     </div>
   </div>
 
+  <!-- Achievements modal -->
+  <div class="achievements-screen" id="achievementsScreen" style="display: none;">
+    <div class="achievements-content">
+      <h2>🏆 Achievements</h2>
+      
+      <div class="player-stats">
+        <div class="stat-item">
+          <span class="stat-label">Level</span>
+          <span class="stat-value" id="playerLevel">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Games Played</span>
+          <span class="stat-value" id="gamesPlayed">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Perfect Games</span>
+          <span class="stat-value" id="perfectGames">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Best Combo</span>
+          <span class="stat-value" id="bestCombo">0</span>
+        </div>
+      </div>
+
+      <div class="xp-bar-container">
+        <div class="xp-info">
+          <span id="currentXP">0 XP</span>
+          <span id="nextLevelXP">100 XP</span>
+        </div>
+        <div class="xp-bar">
+          <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="achievements-grid" id="achievementsGrid">
+        <!-- Achievements will be populated by JavaScript -->
+      </div>
+
+      <button class="modal-close-btn" id="closeAchievementsBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- High Scores modal -->
+  <div class="highscores-screen" id="highScoresScreen" style="display: none;">
+    <div class="highscores-content">
+      <h2>📊 High Scores</h2>
+      
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-score-mode="classic">Classic</button>
+        <button class="mode-tab" data-score-mode="timed">Timed</button>
+        <button class="mode-tab" data-score-mode="blitz">Blitz</button>
+      </div>
+
+      <div id="scoresDisplay">
+        <!-- Scores will be populated by JavaScript -->
+      </div>
+
+      <button class="modal-close-btn" id="closeHighScoresBtn">Close</button>
+    </div>
+  </div>
+
+  <script src="src/playerState.js"></script>
   <script src="src/game.js"></script>
   <script>
     // Bootstrap browser behavior using the exported game API
@@ -142,6 +215,9 @@
 
     // Multi-step flow state
     let selectedMode = 'classic';
+
+    // Initialize player state
+    const playerState = new PlayerState();
 
     // Title screen - tap anywhere to continue
     const titleScreen = document.getElementById('titleScreen');
@@ -256,8 +332,190 @@
       themeToggle.addEventListener('click', () => {
         if (typeof toggleTheme === 'function') toggleTheme();
         updateToggleUI();
+        playerState.recordThemeSwitch();
       });
     }
+
+    // Achievements and High Scores functionality
+    const achievementsScreen = document.getElementById('achievementsScreen');
+    const highScoresScreen = document.getElementById('highScoresScreen');
+    const showAchievementsBtn = document.getElementById('showAchievementsBtn');
+    const showHighScoresBtn = document.getElementById('showHighScoresBtn');
+    const closeAchievementsBtn = document.getElementById('closeAchievementsBtn');
+    const closeHighScoresBtn = document.getElementById('closeHighScoresBtn');
+
+    function showAchievementsModal() {
+      const stats = playerState.getStats();
+      const achievements = playerState.getAllAchievements();
+      
+      // Update stats display
+      document.getElementById('playerLevel').textContent = stats.level;
+      document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
+      document.getElementById('perfectGames').textContent = stats.perfectGames;
+      document.getElementById('bestCombo').textContent = stats.highestCombo;
+      
+      // Update XP bar
+      const xpProgress = ((stats.xp % 50) / 50) * 100;
+      document.getElementById('currentXP').textContent = `${stats.xp} XP`;
+      document.getElementById('nextLevelXP').textContent = `${stats.xpForNextLevel} XP`;
+      document.getElementById('xpFill').style.width = `${xpProgress}%`;
+      
+      // Populate achievements grid
+      const achievementsGrid = document.getElementById('achievementsGrid');
+      achievementsGrid.innerHTML = '';
+      
+      achievements.forEach(achievement => {
+        const card = document.createElement('div');
+        card.className = `achievement-card ${achievement.unlocked ? '' : 'locked'}`;
+        
+        let unlockedDate = '';
+        if (achievement.unlocked && achievement.unlockedAt) {
+          const date = new Date(achievement.unlockedAt);
+          unlockedDate = `<div class="achievement-date">Unlocked ${date.toLocaleDateString()}</div>`;
+        }
+        
+        card.innerHTML = `
+          <span class="achievement-icon">${achievement.icon}</span>
+          <div class="achievement-name">${achievement.name}</div>
+          <div class="achievement-desc">${achievement.description}</div>
+          <div class="achievement-xp">+${achievement.xpReward} XP</div>
+          ${unlockedDate}
+        `;
+        
+        achievementsGrid.appendChild(card);
+      });
+      
+      achievementsScreen.style.display = 'flex';
+    }
+
+    function showHighScoresModal() {
+      updateHighScoresDisplay('classic');
+      highScoresScreen.style.display = 'flex';
+    }
+
+    function updateHighScoresDisplay(mode) {
+      const scoresDisplay = document.getElementById('scoresDisplay');
+      const highScores = playerState.getAllHighScores();
+      const modeScores = highScores[mode] || {};
+      
+      scoresDisplay.innerHTML = '';
+      
+      ['easy', 'medium', 'hard'].forEach(difficulty => {
+        const section = document.createElement('div');
+        section.className = 'difficulty-section';
+        
+        const header = document.createElement('div');
+        header.className = 'difficulty-header';
+        header.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+        section.appendChild(header);
+        
+        const score = modeScores[difficulty];
+        
+        if (score) {
+          const row = document.createElement('div');
+          row.className = 'score-row';
+          
+          row.innerHTML = `
+            <div>
+              <div class="score-label">Score</div>
+              <div class="score-value">${score.score}</div>
+            </div>
+            <div>
+              <div class="score-label">Mistakes</div>
+              <div class="score-value">${score.mistakes || 0}</div>
+            </div>
+            <div>
+              <div class="score-label">Time</div>
+              <div class="score-value">${score.timeElapsed ? Math.floor(score.timeElapsed) + 's' : 'N/A'}</div>
+            </div>
+            <div>
+              <div class="score-label">Max Combo</div>
+              <div class="score-value">${score.maxCombo || 0}x</div>
+            </div>
+          `;
+          
+          section.appendChild(row);
+        } else {
+          const noScore = document.createElement('div');
+          noScore.className = 'no-score';
+          noScore.textContent = 'No score yet - play to set a record!';
+          section.appendChild(noScore);
+        }
+        
+        scoresDisplay.appendChild(section);
+      });
+    }
+
+    // Event listeners for progress buttons
+    if (showAchievementsBtn) {
+      showAchievementsBtn.addEventListener('click', showAchievementsModal);
+    }
+
+    if (showHighScoresBtn) {
+      showHighScoresBtn.addEventListener('click', showHighScoresModal);
+    }
+
+    if (closeAchievementsBtn) {
+      closeAchievementsBtn.addEventListener('click', () => {
+        achievementsScreen.style.display = 'none';
+      });
+    }
+
+    if (closeHighScoresBtn) {
+      closeHighScoresBtn.addEventListener('click', () => {
+        highScoresScreen.style.display = 'none';
+      });
+    }
+
+    // Mode tabs for high scores
+    document.querySelectorAll('.mode-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        updateHighScoresDisplay(tab.dataset.scoreMode);
+      });
+    });
+
+    // Show achievement unlock notification
+    function showAchievementNotification(achievement) {
+      const notification = document.createElement('div');
+      notification.className = 'achievement-unlock-notification';
+      notification.innerHTML = `
+        <span class="achievement-unlock-icon">${achievement.icon}</span>
+        <div class="achievement-unlock-content">
+          <div class="achievement-unlock-title">Achievement Unlocked!</div>
+          <div class="achievement-unlock-name">${achievement.name}</div>
+          <div class="achievement-unlock-xp">+${achievement.xpReward} XP</div>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 4000);
+    }
+
+    // Show level up notification
+    function showLevelUpNotification(level) {
+      const notification = document.createElement('div');
+      notification.className = 'level-up-notification';
+      notification.innerHTML = `
+        <div class="level-up-title">Level Up!</div>
+        <div class="level-up-number">${level}</div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 2000);
+    }
+
+    // Expose to window for game.js
+    window.showAchievementNotification = showAchievementNotification;
+    window.showLevelUpNotification = showLevelUpNotification;
+    window.playerState = playerState;
   </script>
 </body>
 </html>

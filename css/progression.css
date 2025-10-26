@@ -1,0 +1,472 @@
+/* ==========================================================================
+   PROGRESSION.CSS - Achievements, high scores, and progression UI
+   ========================================================================== */
+
+/* Achievements Modal */
+.achievements-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  background: rgba(0,0,0,0.5);
+}
+
+.achievements-content {
+  background: var(--modal-bg);
+  padding: 32px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 30px 60px var(--modal-shadow);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.achievements-content h2 {
+  color: var(--accent);
+  font-size: 32px;
+  margin-bottom: 24px;
+}
+
+.player-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.xp-bar-container {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.xp-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.xp-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #ffd28f);
+  transition: width 0.5s ease;
+  border-radius: 6px;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.achievement-card {
+  background: var(--card-front);
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid var(--card-border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.achievement-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+
+.achievement-card.locked {
+  opacity: 0.5;
+  filter: grayscale(0.8);
+}
+
+.achievement-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.achievement-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.achievement-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  line-height: 1.3;
+}
+
+.achievement-xp {
+  font-size: 12px;
+  color: var(--accent);
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+.achievement-date {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* High Scores Modal */
+.highscores-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  background: rgba(0,0,0,0.5);
+}
+
+.highscores-content {
+  background: var(--modal-bg);
+  padding: 32px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 30px 60px var(--modal-shadow);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.highscores-content h2 {
+  color: var(--accent);
+  font-size: 32px;
+  margin-bottom: 24px;
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.mode-tab {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid var(--card-border);
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-tab:hover {
+  background: var(--card-border);
+}
+
+.mode-tab.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.scores-table {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.difficulty-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(0,0,0,0.03);
+  border-radius: 12px;
+}
+
+.difficulty-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+  background: var(--modal-bg);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  text-align: left;
+  align-items: center;
+}
+
+.score-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.score-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.no-score {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 20px;
+}
+
+/* Close button for modals */
+.modal-close-btn {
+  margin-top: 20px;
+  padding: 12px 32px;
+  border-radius: 10px;
+  border: none;
+  background: var(--button-bg);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.modal-close-btn:active {
+  transform: translateY(0);
+}
+
+/* Progress buttons on mode screen */
+.progress-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.progress-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 2px solid var(--card-border);
+  background: var(--modal-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.progress-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  background: var(--card-front);
+}
+
+.progress-btn:active {
+  transform: translateY(0);
+}
+
+.progress-btn-icon {
+  font-size: 20px;
+}
+
+/* Achievement unlock notification */
+.achievement-unlock-notification {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 11000;
+  background: var(--modal-bg);
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--modal-shadow);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: slideInRight 0.4s ease, slideOutRight 0.4s ease 3.6s forwards;
+  max-width: 300px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+.achievement-unlock-icon {
+  font-size: 36px;
+}
+
+.achievement-unlock-content {
+  flex: 1;
+  text-align: left;
+}
+
+.achievement-unlock-title {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.achievement-unlock-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.achievement-unlock-xp {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Level up notification */
+.level-up-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 11001;
+  background: linear-gradient(135deg, var(--accent), #ffd28f);
+  padding: 32px 48px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  text-align: center;
+  animation: levelUpPop 0.6s cubic-bezier(.2,.9,.3,1);
+  pointer-events: none;
+}
+
+@keyframes levelUpPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.level-up-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.level-up-number {
+  font-size: 64px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .achievements-content,
+  .highscores-content {
+    padding: 20px;
+    max-height: 90vh;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .achievement-card {
+    padding: 12px;
+  }
+
+  .achievement-icon {
+    font-size: 36px;
+  }
+
+  .player-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .score-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .achievement-unlock-notification {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+}
