@@ -63,29 +63,34 @@ describe('PlayerState', () => {
       expect(result.xp).toBe(50);
     });
 
-    test('should level up at 100 XP', () => {
+    test('should level up with exponential curve (level 2 at 100 XP)', () => {
+      // Level 1->2 requires 100 XP
       const result = playerState.addXP(100);
       expect(playerState.state.level).toBe(2);
       expect(result.leveledUp).toBe(true);
       expect(result.level).toBe(2);
     });
 
-    test('should calculate level correctly', () => {
+    test('should calculate level correctly with exponential curve', () => {
       expect(playerState.calculateLevel(0)).toBe(1);
       expect(playerState.calculateLevel(99)).toBe(1);
       expect(playerState.calculateLevel(100)).toBe(2);
-      expect(playerState.calculateLevel(150)).toBe(3);
-      expect(playerState.calculateLevel(200)).toBe(4);
+      expect(playerState.calculateLevel(381)).toBe(2);
+      expect(playerState.calculateLevel(382)).toBe(3); // 100 + 282 = 382
+      expect(playerState.calculateLevel(901)).toBe(4); // 100 + 282 + 519 = 901
     });
 
-    test('should return XP needed for next level', () => {
+    test('should return XP needed for next level with exponential curve', () => {
+      // Level 1: needs 100 XP
       expect(playerState.getXPForNextLevel()).toBe(100);
       
+      // Level 2: needs 282 XP (100 * 2^1.5)
       playerState.addXP(100);
-      expect(playerState.getXPForNextLevel()).toBe(150);
+      expect(playerState.getXPForNextLevel()).toBe(282);
       
-      playerState.addXP(50);
-      expect(playerState.getXPForNextLevel()).toBe(200);
+      // Level 3: needs 519 XP (100 * 3^1.5)
+      playerState.addXP(282);
+      expect(playerState.getXPForNextLevel()).toBe(519);
     });
   });
 

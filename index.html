@@ -354,10 +354,12 @@
       document.getElementById('perfectGames').textContent = stats.perfectGames;
       document.getElementById('bestCombo').textContent = stats.highestCombo;
       
-      // Update XP bar
-      const xpProgress = ((stats.xp % 50) / 50) * 100;
-      document.getElementById('currentXP').textContent = `${stats.xp} XP`;
-      document.getElementById('nextLevelXP').textContent = `${stats.xpForNextLevel} XP`;
+      // Update XP bar with new exponential calculation
+      const currentLevelXP = playerState.getCurrentLevelProgress();
+      const xpForNextLevel = playerState.getXPForNextLevel();
+      const xpProgress = (currentLevelXP / xpForNextLevel) * 100;
+      document.getElementById('currentXP').textContent = `${currentLevelXP} / ${xpForNextLevel} XP`;
+      document.getElementById('nextLevelXP').textContent = `Level ${stats.level + 1}`;
       document.getElementById('xpFill').style.width = `${xpProgress}%`;
       
       // Populate achievements grid

@@ -9,70 +9,70 @@ const ACHIEVEMENTS = {
     name: 'First Match',
     description: 'Complete your first match',
     icon: '🎯',
-    xpReward: 10
+    xpReward: 5
   },
   PERFECT_GAME: {
     id: 'perfect_game',
     name: 'Perfect Memory',
     description: 'Complete a game with no mistakes',
     icon: '⭐',
-    xpReward: 50
+    xpReward: 25
   },
   SPEED_DEMON: {
     id: 'speed_demon',
     name: 'Speed Demon',
     description: 'Complete a game in under 30 seconds',
     icon: '⚡',
-    xpReward: 75
+    xpReward: 35
   },
   COMBO_MASTER: {
     id: 'combo_master',
     name: 'Combo Master',
     description: 'Achieve a 5x combo or higher',
     icon: '🔥',
-    xpReward: 100
+    xpReward: 50
   },
   BLITZ_CHAMPION: {
     id: 'blitz_champion',
     name: 'Blitz Champion',
     description: 'Score 500+ points in Blitz mode',
     icon: '💥',
-    xpReward: 100
+    xpReward: 50
   },
   TIME_TRIAL_EXPERT: {
     id: 'time_trial_expert',
     name: 'Time Trial Expert',
     description: 'Complete a timed game with 30+ seconds remaining',
     icon: '⏱️',
-    xpReward: 75
+    xpReward: 35
   },
   HARD_MODE_VICTOR: {
     id: 'hard_mode_victor',
     name: 'Hard Mode Victor',
     description: 'Complete a game on Hard difficulty',
     icon: '🏆',
-    xpReward: 100
+    xpReward: 50
   },
   STREAK_MASTER: {
     id: 'streak_master',
     name: 'Streak Master',
     description: 'Play 5 games in a row',
     icon: '📈',
-    xpReward: 50
+    xpReward: 25
   },
   HUNDRED_MATCHES: {
     id: 'hundred_matches',
     name: 'Century Club',
     description: 'Complete 100 matches',
     icon: '💯',
-    xpReward: 200
+    xpReward: 100
   },
   THEME_EXPLORER: {
     id: 'theme_explorer',
     name: 'Theme Explorer',
     description: 'Switch between light and dark themes',
     icon: '🌓',
-    xpReward: 25
+    xpReward: 10
   }
 };
 
@@ -162,19 +162,46 @@ class PlayerState {
   }
 
   /**
-   * Calculate level based on XP (requires 100 XP for level 2, then +50 per level)
+   * Calculate level based on XP with exponential curve
+   * Formula: XP needed = 100 * level^1.5
+   * Level 2: 283 XP, Level 3: 520 XP, Level 4: 800 XP, Level 5: 1,118 XP, etc.
    */
   calculateLevel(xp) {
-    if (xp < 100) return 1;
-    return Math.floor((xp - 100) / 50) + 2;
+    if (xp === 0) return 1;
+    
+    // Find the level by checking cumulative XP thresholds
+    let level = 1;
+    let cumulativeXP = 0;
+    
+    while (true) {
+      const xpForNextLevel = Math.floor(100 * Math.pow(level, 1.5));
+      if (cumulativeXP + xpForNextLevel > xp) {
+        return level;
+      }
+      cumulativeXP += xpForNextLevel;
+      level++;
+      
+      // Safety cap at level 100
+      if (level > 100) return 100;
+    }
   }
 
   /**
-   * Get XP needed for next level
+   * Get total XP needed to reach next level
    */
   getXPForNextLevel() {
-    if (this.state.level === 1) return 100;
-    return 100 + (this.state.level - 1) * 50;
+    return Math.floor(100 * Math.pow(this.state.level, 1.5));
+  }
+  
+  /**
+   * Get current XP progress within current level
+   */
+  getCurrentLevelProgress() {
+    let cumulativeXP = 0;
+    for (let i = 1; i < this.state.level; i++) {
+      cumulativeXP += Math.floor(100 * Math.pow(i, 1.5));
+    }
+    return this.state.xp - cumulativeXP;
   }
 
   /**
@@ -249,31 +276,31 @@ class PlayerState {
   }
 
   /**
-   * Calculate XP earned from a game
+   * Calculate XP earned from a game (reduced for exponential leveling)
    */
   calculateGameXP(gameData) {
     const { score, mistakes, maxCombo, mode } = gameData;
     
-    let baseXP = 10; // Base XP for completing a game
+    let baseXP = 5; // Reduced base XP for completing a game
     
-    // Bonus for score
-    baseXP += Math.floor(score / 10);
+    // Bonus for score (reduced multiplier)
+    baseXP += Math.floor(score / 20);
     
     // Bonus for perfect game
     if (mistakes === 0) {
-      baseXP += 20;
+      baseXP += 10;
     }
     
-    // Bonus for combos
+    // Bonus for combos (reduced)
     if (maxCombo >= 3) {
-      baseXP += maxCombo * 5;
+      baseXP += maxCombo * 2;
     }
     
-    // Mode multipliers
+    // Mode multipliers (reduced)
     if (mode === 'blitz') {
-      baseXP = Math.floor(baseXP * 1.5);
+      baseXP = Math.floor(baseXP * 1.3);
     } else if (mode === 'timed') {
-      baseXP = Math.floor(baseXP * 1.2);
+      baseXP = Math.floor(baseXP * 1.15);
     }
     
     return baseXP;
