@@ -60,6 +60,8 @@
   border-radius: 20px;
   text-align: center;
   box-shadow: 0 30px 60px var(--modal-shadow);
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .mode-content h2 {
@@ -505,18 +507,30 @@
   }
   .mode-buttons {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
   }
   .mode-btn {
     width: 100%;
     max-width: 280px;
+    padding: 18px 24px;
+  }
+  .mode-emoji {
+    font-size: 36px;
+  }
+  .mode-name {
+    font-size: 18px;
+  }
+  .mode-desc {
+    font-size: 13px;
   }
   .mode-content {
-    padding: 28px 20px;
-    margin: 0 16px;
+    padding: 20px 16px;
+    margin: 16px;
+    max-height: 95vh;
   }
   .mode-content h2 {
-    font-size: 26px;
+    font-size: 24px;
+    margin-bottom: 16px;
   }
   .start-content {
     margin: 0 16px;

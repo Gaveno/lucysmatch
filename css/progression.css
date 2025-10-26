@@ -469,4 +469,18 @@
     left: 10px;
     max-width: none;
   }
+
+  .progress-buttons {
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .progress-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .progress-btn-icon {
+    font-size: 16px;
+  }
 }
