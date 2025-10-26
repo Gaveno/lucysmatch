@@ -10,16 +10,24 @@ Lucy's Match is a dynamic memory card matching game using colorful emoji and fun
 
 ### Game Modes
 - **Classic Mode** 🎯 — Relaxed, untimed play. Perfect your strategy!
+  - Choose difficulty: Easy (8 cards), Medium (12 cards), or Hard (16 cards)
 - **Timed Mode** ⏱️ — Complete as many boards as possible before time runs out! Choose from:
   - ⏰ Quick (1 minute)
   - ⏲️ Standard (2 minutes)
   - ⏳ Marathon (3 minutes)
-- **Blitz Mode** ⚡ — Fast-paced 1-minute challenge with the clock ticking!
+  - Then select difficulty for each round
+- **Blitz Mode** ⚡ — Combo-focused 1-minute challenge!
+  - Fixed 4×5 grid (20 cards, 10 pairs)
+  - Visual hints appear when both cards in a pair have been discovered
+  - 5 unique animated border effects (glow, pulse, shimmer, wave, spark)
+  - Hints persist on matched cards to keep the board exciting
+  - Perfect for building massive combo chains!
 
 ### Difficulty Levels
-- Easy (8 cards) 🌱
-- Medium (12 cards) 🌿
-- Hard (16 cards) 🌳
+- Easy (8 cards) 🌱 — *Classic and Timed modes*
+- Medium (12 cards) 🌿 — *Classic and Timed modes*
+- Hard (16 cards) 🌳 — *Classic and Timed modes*
+- Fixed 4×5 (20 cards) ⚡ — *Blitz mode only*
 
 ### Scoring & Progression
 - **Combo System** — Chain consecutive matches for massive score multipliers (up to 8x!)
@@ -33,6 +41,13 @@ Lucy's Match is a dynamic memory card matching game using colorful emoji and fun
 - **Animated Result Screen** — Staggered animations reveal your stats in an exciting sequence
 - **Smart UI** — Play Again button hidden until animations complete (no accidental dismissals!)
 - **Time Selection Screen** — Each duration option has unique icons and idle animations
+- **Blitz Mode Pair Hints** — 5 unique animated border effects that appear when both cards discovered:
+  - 🔴 Glow (Rose Pink) - Pulsing intensity
+  - 🔵 Pulse (Sky Blue) - Breathing with scale
+  - 🟢 Shimmer (Pale Green) - Shimmering waves
+  - 🟡 Wave (Golden) - Directional rotation
+  - 🟣 Spark (Purple) - Bursting energy
+- **Responsive Scaling** — Blitz mode grid automatically fits viewport height
 - Sweet, pastel UI with playful fonts and smooth transitions
 - Flip animations, match pulse effects, and confetti explosions
 - Dark/Light theme toggle 🌙/🌞
@@ -43,8 +58,15 @@ Lucy's Match is a dynamic memory card matching game using colorful emoji and fun
 Open `index.html` in your browser:
 1. Select your game mode (Classic, Timed, or Blitz)
 2. For Timed mode, choose your duration (1-3 minutes)
-3. Select difficulty level (Easy, Medium, Hard)
-4. Match all pairs and watch your score soar!
+3. For Classic/Timed, select difficulty level (Easy, Medium, Hard)
+4. Blitz mode starts immediately with 20 cards
+5. Match all pairs and watch your score soar!
+
+**Blitz Mode Tips:**
+- Flip cards to discover them — hints only appear after both cards in a pair have been seen
+- Use the animated border hints to quickly identify matching pairs
+- Chain matches rapidly to build massive combos (up to 8x multiplier!)
+- Hints remain on matched cards, keeping the board colorful and exciting
 
 In Timed mode, completed boards automatically reset — see how many you can finish before time expires!
 

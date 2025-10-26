@@ -27,6 +27,11 @@ let isPaused = false;
 let boardsCompleted = 0; // Track how many full boards completed in timed mode
 let currentCardCount = 8; // Track current difficulty level
 
+// Blitz mode: Track discovered cards and pair hint assignments
+let discoveredCardElements = new Set(); // Store card DOM elements that have been seen
+let pairHintMap = new Map(); // Map symbol to hint class (pair-hint-1, pair-hint-2, etc.)
+let nextHintIndex = 1; // Cycle through 5 hint styles
+
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -116,6 +121,11 @@ function startGame(cardCount, mode = 'classic', customDuration = null) {
   gameStartTime = null;
   timerInterval = null;
   
+  // Blitz mode: Reset discovery tracking
+  discoveredCardElements.clear();
+  pairHintMap.clear();
+  nextHintIndex = 1;
+  
   // Store custom duration for timed mode
   if (mode === 'timed' && customDuration) {
     window.customTimedDuration = customDuration;
@@ -155,12 +165,26 @@ function onCardClick(e) {
     firstCard = null;
     secondCard = null;
     lockBoard = false;
+    
+    // Blitz mode: Reapply hints after immediate flip back
+    if (gameMode === 'blitz') {
+      applyPairHints();
+    }
   }
 
   // NOW flip the new card (after old ones are flipped back)
   card.classList.add('flipped');
   // Update aria label when revealed
   card.setAttribute('aria-label', `Revealed card ${card.dataset.symbol}`);
+  
+  // Blitz mode: Track this specific card element as discovered
+  if (gameMode === 'blitz') {
+    if (!discoveredCardElements.has(card)) {
+      discoveredCardElements.add(card);
+      // Check if both cards of this symbol have now been discovered
+      checkAndAssignPairHint(card.dataset.symbol);
+    }
+  }
   
   // If no first card, this becomes the first card
   if (!firstCard) {
@@ -198,6 +222,11 @@ function onCardClick(e) {
     if (combo > 1) showComboPopup(combo, points);
     
     updateHUD();
+    
+    // Blitz mode: Keep pair hints visible on matched cards
+    if (gameMode === 'blitz') {
+      applyPairHints();
+    }
     
     firstCard = null;
     secondCard = null;
@@ -237,6 +266,10 @@ function onCardClick(e) {
     // Reset combo on mismatch
     combo = 0;
     updateHUD();
+    // Blitz mode: Reapply hints after cards flip back
+    if (gameMode === 'blitz') {
+      applyPairHints();
+    }
     // vibration on mismatch
     if (navigator.vibrate) navigator.vibrate([30,20,30]);
   }, mismatchDelay);
@@ -244,6 +277,52 @@ function onCardClick(e) {
 
 function confettiEffect(x, y) {
   // no-op in tests
+}
+
+// Blitz mode: Check if both cards in a pair have been discovered, assign hint class
+function checkAndAssignPairHint(symbol) {
+  if (gameMode !== 'blitz' || !gameBoard) return;
+  
+  // Get both cards with this symbol
+  const allCards = Array.from(gameBoard.querySelectorAll('.card'));
+  const symbolCards = allCards.filter(c => c.dataset.symbol === symbol);
+  
+  // Check if BOTH individual card elements have been discovered
+  const bothSeen = symbolCards.length === 2 && 
+                   symbolCards.every(c => discoveredCardElements.has(c));
+  
+  if (bothSeen && !pairHintMap.has(symbol)) {
+    // Assign a hint class (cycle through 5 styles)
+    const hintClass = `pair-hint-${nextHintIndex}`;
+    pairHintMap.set(symbol, hintClass);
+    nextHintIndex = (nextHintIndex % 5) + 1; // Cycle 1-5
+    
+    // Apply hint class to both cards of this pair
+    applyPairHints();
+  }
+}
+
+// Blitz mode: Apply hint classes to all discovered but unmatched pairs
+function applyPairHints() {
+  if (gameMode !== 'blitz' || !gameBoard) return;
+  
+  const allCards = Array.from(gameBoard.querySelectorAll('.card'));
+  
+  allCards.forEach(card => {
+    const symbol = card.dataset.symbol;
+    const hintClass = pairHintMap.get(symbol);
+    
+    // Remove all existing hint classes first
+    for (let i = 1; i <= 5; i++) {
+      card.classList.remove(`pair-hint-${i}`);
+    }
+    
+    // Apply hint class if this symbol has a hint assigned (meaning both cards discovered)
+    // Keep the hint even if matched (to keep board exciting)
+    if (hintClass) {
+      card.classList.add(hintClass);
+    }
+  });
 }
 
 function resetBoardForNextRound() {
@@ -439,7 +518,19 @@ function releaseFocus(modal) {
 }
 
 function _internals() {
-  return { misses, matchesFound, activeSymbols, boardsCompleted, gameMode, score, combo, maxCombo };
+  return { 
+    misses, 
+    matchesFound, 
+    activeSymbols, 
+    boardsCompleted, 
+    gameMode, 
+    score, 
+    combo, 
+    maxCombo,
+    discoveredCardElements,
+    pairHintMap,
+    nextHintIndex
+  };
 }
 
 function restartGame() {
@@ -453,6 +544,10 @@ function restartGame() {
   // Hide HUD
   const hud = document.getElementById('gameHUD');
   if (hud) hud.classList.remove('active');
+  
+  // Remove blitz-mode class from game board
+  const gameBoard = document.getElementById('gameBoard');
+  if (gameBoard) gameBoard.classList.remove('blitz-mode');
   
   // Return to title screen instead of start modal
   const titleScreen = document.getElementById('titleScreen');
@@ -474,6 +569,12 @@ function restartGame() {
   boardsCompleted = 0;
   currentCardCount = 8;
   timeRemaining = 0;
+  
+  // Blitz mode: Reset discovery tracking
+  discoveredCardElements.clear();
+  pairHintMap.clear();
+  nextHintIndex = 1;
+  
   updateHUD();
 }
 
@@ -773,6 +874,9 @@ if (typeof module !== 'undefined' && module.exports) {
     updateHUD,
     calculateFinalScore,
     resetBoardForNextRound,
+    // Blitz mode pair hints
+    checkAndAssignPairHint,
+    applyPairHints,
     // expose internals for assertions
     _internals,
     restartGame,
@@ -804,6 +908,9 @@ if (typeof window !== 'undefined') {
   window.updateHUD = updateHUD;
   window.calculateFinalScore = calculateFinalScore;
   window.resetBoardForNextRound = resetBoardForNextRound;
+  // Blitz mode pair hints
+  window.checkAndAssignPairHint = checkAndAssignPairHint;
+  window.applyPairHints = applyPairHints;
   window.restartGame = restartGame;
   window.setMismatchDelay = setMismatchDelay;
   window.getStarRating = getStarRating;

@@ -109,7 +109,18 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+      max-width: 600px;
+      margin: 0 auto;
     }
+    
+    /* Blitz mode: Scale to fit 5 rows vertically */
+    .game-board.blitz-mode {
+      max-height: calc(100vh - 180px); /* Account for HUD and padding */
+      width: auto;
+      aspect-ratio: 4 / 5; /* 4 columns, 5 rows */
+      max-width: min(600px, calc((100vh - 180px) * 0.8));
+    }
+    
     /* Start modal styles */
     .start-modal{ 
       position: fixed; 
@@ -245,6 +256,113 @@
       transform-origin: center;
       border-radius: 3px;
     }
+    
+    /* Blitz Mode: Pair Hint Effects */
+    .card.pair-hint-1 {
+      box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.6), 
+                  0 0 20px rgba(255, 107, 129, 0.4);
+      animation: hintGlow1 2s ease-in-out infinite;
+    }
+    .card.pair-hint-2 {
+      box-shadow: 0 0 0 3px rgba(135, 206, 250, 0.6),
+                  0 0 20px rgba(135, 206, 250, 0.4);
+      animation: hintPulse2 2.5s ease-in-out infinite;
+    }
+    .card.pair-hint-3 {
+      box-shadow: 0 0 0 3px rgba(152, 251, 152, 0.6),
+                  0 0 20px rgba(152, 251, 152, 0.4);
+      animation: hintShimmer3 3s ease-in-out infinite;
+    }
+    .card.pair-hint-4 {
+      box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+                  0 0 20px rgba(255, 215, 0, 0.4);
+      animation: hintWave4 2.2s ease-in-out infinite;
+    }
+    .card.pair-hint-5 {
+      box-shadow: 0 0 0 3px rgba(186, 85, 211, 0.6),
+                  0 0 20px rgba(186, 85, 211, 0.4);
+      animation: hintSpark5 2.8s ease-in-out infinite;
+    }
+    
+    @keyframes hintGlow1 {
+      0%, 100% { 
+        box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.6), 
+                    0 0 20px rgba(255, 107, 129, 0.4);
+      }
+      50% { 
+        box-shadow: 0 0 0 4px rgba(255, 107, 129, 0.8), 
+                    0 0 30px rgba(255, 107, 129, 0.6),
+                    0 0 40px rgba(255, 107, 129, 0.3);
+      }
+    }
+    @keyframes hintPulse2 {
+      0%, 100% { 
+        box-shadow: 0 0 0 3px rgba(135, 206, 250, 0.6),
+                    0 0 20px rgba(135, 206, 250, 0.4);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 0 4px rgba(135, 206, 250, 0.8),
+                    0 0 35px rgba(135, 206, 250, 0.7);
+        transform: scale(1.02);
+      }
+    }
+    @keyframes hintShimmer3 {
+      0%, 100% { 
+        box-shadow: 0 0 0 3px rgba(152, 251, 152, 0.6),
+                    0 0 20px rgba(152, 251, 152, 0.4);
+      }
+      25% { 
+        box-shadow: 0 0 0 3px rgba(152, 251, 152, 0.4),
+                    0 0 15px rgba(152, 251, 152, 0.3);
+      }
+      50% { 
+        box-shadow: 0 0 0 4px rgba(152, 251, 152, 0.9),
+                    0 0 35px rgba(152, 251, 152, 0.6);
+      }
+      75% { 
+        box-shadow: 0 0 0 3px rgba(152, 251, 152, 0.4),
+                    0 0 15px rgba(152, 251, 152, 0.3);
+      }
+    }
+    @keyframes hintWave4 {
+      0% { 
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+                    -10px 0 20px rgba(255, 215, 0, 0.4);
+      }
+      25% { 
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+                    0 -10px 20px rgba(255, 215, 0, 0.4);
+      }
+      50% { 
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+                    10px 0 20px rgba(255, 215, 0, 0.4);
+      }
+      75% { 
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+                    0 10px 20px rgba(255, 215, 0, 0.4);
+      }
+      100% { 
+        box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+                    -10px 0 20px rgba(255, 215, 0, 0.4);
+      }
+    }
+    @keyframes hintSpark5 {
+      0%, 100% { 
+        box-shadow: 0 0 0 3px rgba(186, 85, 211, 0.6),
+                    0 0 20px rgba(186, 85, 211, 0.4);
+      }
+      20%, 40%, 60%, 80% { 
+        box-shadow: 0 0 0 3px rgba(186, 85, 211, 0.5),
+                    0 0 15px rgba(186, 85, 211, 0.3);
+      }
+      30%, 50%, 70% { 
+        box-shadow: 0 0 0 4px rgba(186, 85, 211, 0.9),
+                    0 0 40px rgba(186, 85, 211, 0.7),
+                    0 0 60px rgba(186, 85, 211, 0.4);
+      }
+    }
+    
     /* New styles for star icons in result modal */
     .star {
       font-size: 90px; /* bigger, more playful */
@@ -1098,7 +1216,7 @@
         <button class="mode-btn blitz-btn" data-mode="blitz">
           <span class="mode-emoji">⚡</span>
           <span class="mode-name">Blitz</span>
-          <span class="mode-desc">1 minute!</span>
+          <span class="mode-desc">Max combos!</span>
         </button>
       </div>
     </div>
@@ -1190,12 +1308,17 @@
         selectedMode = btn.dataset.mode;
         modeScreen.style.display = 'none';
         
+        // Blitz mode: fixed 4x5 grid (20 cards), skip difficulty selection
+        if (selectedMode === 'blitz') {
+          startGame(20, selectedMode);
+          showHUD(selectedMode);
+        }
         // If timed mode, show time selection screen
-        if (selectedMode === 'timed') {
+        else if (selectedMode === 'timed') {
           timeScreen.style.display = 'flex';
           if (typeof trapFocus === 'function') trapFocus(timeScreen);
         } else {
-          // For classic and blitz, go straight to difficulty
+          // For classic, go straight to difficulty
           startModal.style.display = 'flex';
           if (typeof trapFocus === 'function') trapFocus(startModal);
         }
@@ -1234,6 +1357,8 @@
     function showHUD(mode) {
       const hud = document.getElementById('gameHUD');
       const timerItem = document.querySelector('.timer-item');
+      const gameBoard = document.getElementById('gameBoard');
+      
       if (hud) {
         hud.classList.add('active');
       }
@@ -1241,6 +1366,15 @@
         timerItem.classList.add('active');
       } else if (timerItem) {
         timerItem.classList.remove('active');
+      }
+      
+      // Apply blitz-mode class for scaled layout
+      if (gameBoard) {
+        if (mode === 'blitz') {
+          gameBoard.classList.add('blitz-mode');
+        } else {
+          gameBoard.classList.remove('blitz-mode');
+        }
       }
     }
 
