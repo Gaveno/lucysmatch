@@ -24,6 +24,8 @@ let timerInterval = null;
 let timeRemaining = 0;
 let gameStartTime = null;
 let isPaused = false;
+let boardsCompleted = 0; // Track how many full boards completed in timed mode
+let currentCardCount = 8; // Track current difficulty level
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -44,11 +46,18 @@ function initGame(cardCount) {
   secondCard = null;
   lockBoard = false;
   mismatchTimeout = null;
-  score = 0;
-  combo = 0;
-  maxCombo = 0;
+  
+  // Only reset these on initial game start, not board resets
+  if (!currentCardCount || currentCardCount !== cardCount) {
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    boardsCompleted = 0;
+    currentCardCount = cardCount;
+  }
+  
   lastMatchTime = null;
-  gameStartTime = Date.now();
+  gameStartTime = gameStartTime || Date.now();
   isPaused = false;
   
   const pairCount = cardCount / 2;
@@ -56,11 +65,13 @@ function initGame(cardCount) {
   activeSymbols = shuffledMaster.slice(0, pairCount);
   cards = shuffle([...activeSymbols, ...activeSymbols]);
   
-  // Initialize timer for timed/blitz modes
-  if (gameMode === 'timed') {
-    timeRemaining = 120; // 2 minutes for timed mode
+  // Initialize timer for timed/blitz modes (only on first init)
+  if (!timerInterval && gameMode === 'timed') {
+    // Use custom duration if provided, otherwise default to 120 seconds
+    const duration = window.customTimedDuration || 120;
+    timeRemaining = duration;
     startTimer();
-  } else if (gameMode === 'blitz') {
+  } else if (!timerInterval && gameMode === 'blitz') {
     timeRemaining = 60; // 1 minute for blitz mode
     startTimer();
   }
@@ -95,8 +106,21 @@ function initGame(cardCount) {
   });
 }
 
-function startGame(cardCount, mode = 'classic') {
+function startGame(cardCount, mode = 'classic', customDuration = null) {
   gameMode = mode;
+  boardsCompleted = 0;
+  currentCardCount = cardCount;
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  gameStartTime = null;
+  timerInterval = null;
+  
+  // Store custom duration for timed mode
+  if (mode === 'timed' && customDuration) {
+    window.customTimedDuration = customDuration;
+  }
+  
   const startModal = document.getElementById('startModal');
   if (startModal) startModal.style.display = 'none';
   // release focus trap for start modal when game starts
@@ -177,9 +201,26 @@ function onCardClick(e) {
     
     firstCard = null;
     secondCard = null;
+    
+    // Check if board is complete
     if (matchesFound === activeSymbols.length) {
-      stopTimer();
-      showResult();
+      // In timed mode, increment boards and reset for another round
+      if (gameMode === 'timed') {
+        boardsCompleted++;
+        // Give a brief moment to see the final match, then reset
+        setTimeout(() => {
+          if (timeRemaining > 0) {
+            resetBoardForNextRound();
+          } else {
+            stopTimer();
+            showResult();
+          }
+        }, 500);
+      } else {
+        // Classic and Blitz modes end the game
+        stopTimer();
+        showResult();
+      }
     }
     return;
   }
@@ -203,6 +244,54 @@ function onCardClick(e) {
 
 function confettiEffect(x, y) {
   // no-op in tests
+}
+
+function resetBoardForNextRound() {
+  // Clear the board visually
+  if (gameBoard) {
+    gameBoard.innerHTML = '';
+  }
+  
+  // Reset game state for new board but keep score, combo, and timer
+  misses = 0;
+  matchesFound = 0;
+  firstCard = null;
+  secondCard = null;
+  lockBoard = false;
+  
+  // Generate new random pairs
+  const pairCount = currentCardCount / 2;
+  const shuffledMaster = shuffle([...masterSymbols]);
+  activeSymbols = shuffledMaster.slice(0, pairCount);
+  cards = shuffle([...activeSymbols, ...activeSymbols]);
+  
+  // Render new board with same structure as initGame
+  cards.forEach(symbol => {
+    const card = document.createElement('div');
+    card.classList.add('card');
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">${symbol}</div>
+        <div class="card-back"></div>
+      </div>
+    `;
+    card.dataset.symbol = symbol;
+    // Accessibility: make cards focusable and announceable
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', 'Hidden card');
+    // Keyboard support
+    card.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        onCardClick({ currentTarget: card });
+      }
+    });
+    card.addEventListener('click', onCardClick);
+    gameBoard.appendChild(card);
+  });
+  
+  updateHUD();
 }
 
 // Timer system
@@ -276,14 +365,20 @@ function showComboPopup(comboCount, points) {
 function calculateFinalScore() {
   let finalScore = score;
   
+  // Board completion bonus for timed mode
+  if (gameMode === 'timed') {
+    const boardBonus = boardsCompleted * 500; // 500 points per completed board
+    finalScore += boardBonus;
+  }
+  
   // Time bonus for timed/blitz modes
   if ((gameMode === 'timed' || gameMode === 'blitz') && timeRemaining > 0) {
     const timeBonus = timeRemaining * 10;
     finalScore += timeBonus;
   }
   
-  // Perfect game bonus (no misses)
-  if (misses === 0) {
+  // Perfect game bonus (no misses) - only for classic/blitz
+  if (gameMode !== 'timed' && misses === 0) {
     finalScore += 1000;
   }
   
@@ -344,7 +439,7 @@ function releaseFocus(modal) {
 }
 
 function _internals() {
-  return { misses, matchesFound, activeSymbols };
+  return { misses, matchesFound, activeSymbols, boardsCompleted, gameMode, score, combo, maxCombo };
 }
 
 function restartGame() {
@@ -376,6 +471,8 @@ function restartGame() {
   score = 0;
   combo = 0;
   maxCombo = 0;
+  boardsCompleted = 0;
+  currentCardCount = 8;
   timeRemaining = 0;
   updateHUD();
 }
@@ -490,44 +587,164 @@ function showResult() {
   // Calculate final score with bonuses
   const finalScore = calculateFinalScore();
   
-  // Determine star rating based on misses
-  const stars = getStarRating(misses);
+  // Determine star rating based on performance
+  let stars;
+  if (gameMode === 'timed') {
+    // Stars based on boards completed
+    if (boardsCompleted >= 5) stars = 3;
+    else if (boardsCompleted >= 3) stars = 2;
+    else stars = 1;
+  } else {
+    // Stars based on misses for classic/blitz
+    stars = getStarRating(misses);
+  }
 
   // Map star count to title
   let title = 'Nice!';
   if (stars === 3) title = 'AMAZING!';
   else if (stars === 2) title = 'Great!';
 
+  const modal = document.getElementById('resultModal');
   const titleEl = document.getElementById('resultTitle');
-  if (titleEl) titleEl.textContent = title;
-  
-  // Show score in result modal
   const scoreEl = document.getElementById('finalScore');
-  if (scoreEl) {
-    scoreEl.textContent = `Score: ${finalScore}`;
-    if (maxCombo > 1) {
-      scoreEl.textContent += ` | Max Combo: ×${maxCombo}`;
-    }
-  }
-
   const starContainer = document.getElementById('starResult');
+  
+  // Check if we're in a test environment
+  const isTest = typeof jest !== 'undefined' || typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
+  
+  // Get the play again button
+  const playAgainBtn = document.getElementById('playAgainBtn');
+  
+  if (isTest) {
+    // Instant display for tests
+    if (titleEl) titleEl.textContent = title;
+    
+    if (scoreEl) {
+      scoreEl.textContent = `Score: ${finalScore}`;
+      if (gameMode === 'timed') {
+        scoreEl.textContent += ` | Boards: ${boardsCompleted}`;
+      }
+      if (maxCombo > 1) {
+        scoreEl.textContent += ` | Max Combo: ×${maxCombo}`;
+      }
+    }
+    
+    if (starContainer) {
+      starContainer.innerHTML = '';
+      for (let i = 0; i < stars; i++) {
+        const star = document.createElement('span');
+        star.classList.add('star');
+        star.textContent = '★';
+        star.classList.add('stamp');
+        starContainer.appendChild(star);
+      }
+    }
+    
+    if (playAgainBtn) playAgainBtn.style.display = 'block';
+    if (modal) modal.classList.add('show');
+    if (modal) trapFocus(modal);
+    return;
+  }
+  
+  // Animated display for browser
+  // Hide play again button initially
+  if (playAgainBtn) {
+    playAgainBtn.style.opacity = '0';
+    playAgainBtn.style.transform = 'scale(0.8)';
+    playAgainBtn.style.pointerEvents = 'none';
+  }
+  
+  // Show modal first but hide all content
+  if (modal) {
+    modal.classList.add('show');
+    modal.style.pointerEvents = 'none'; // Disable clicking initially
+  }
+  
+  // Reset and hide all animated elements
+  if (titleEl) {
+    titleEl.textContent = title;
+    titleEl.style.opacity = '0';
+    titleEl.style.transform = 'scale(0.5)';
+  }
+  
+  if (scoreEl) {
+    scoreEl.style.opacity = '0';
+    scoreEl.style.transform = 'translateY(20px)';
+  }
+  
   if (starContainer) {
     starContainer.innerHTML = '';
-    // Add star icons immediately, then stagger a stamp-like entrance for each
-    for (let i = 0; i < stars; i++) {
-      const star = document.createElement('span');
-      star.classList.add('star');
-      star.textContent = '★';
-      starContainer.appendChild(star);
-      // apply stamp class slightly staggered to create sequential entrance
-      (function(s, delay){
-        setTimeout(() => { s.classList.add('stamp'); }, delay);
-      })(star, i * 220);
-    }
+    starContainer.style.opacity = '0';
   }
-
-  const modal = document.getElementById('resultModal');
-  if (modal) modal.classList.add('show');
+  
+  // Staggered animation sequence
+  // 1. Title appears (500ms delay)
+  setTimeout(() => {
+    if (titleEl) {
+      titleEl.style.transition = 'opacity 400ms ease, transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+      titleEl.style.opacity = '1';
+      titleEl.style.transform = 'scale(1)';
+    }
+  }, 500);
+  
+  // 2. Stars appear one by one (starting at 1000ms)
+  setTimeout(() => {
+    if (starContainer) {
+      starContainer.style.transition = 'opacity 300ms ease';
+      starContainer.style.opacity = '1';
+      
+      // Add star icons and stagger their entrance
+      for (let i = 0; i < stars; i++) {
+        const star = document.createElement('span');
+        star.classList.add('star');
+        star.textContent = '★';
+        star.style.opacity = '0';
+        star.style.transform = 'scale(0) rotate(-180deg)';
+        starContainer.appendChild(star);
+        
+        // Animate each star
+        setTimeout(() => {
+          star.style.transition = 'opacity 300ms ease, transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+          star.style.opacity = '1';
+          star.style.transform = 'scale(1) rotate(0deg)';
+          star.classList.add('stamp');
+        }, i * 300);
+      }
+    }
+  }, 1000);
+  
+  // 3. Score info appears (after stars, ~2200ms)
+  const scoreDelay = 1000 + (stars * 300) + 200;
+  setTimeout(() => {
+    if (scoreEl) {
+      scoreEl.textContent = `Score: ${finalScore}`;
+      if (gameMode === 'timed') {
+        scoreEl.textContent += ` | Boards: ${boardsCompleted}`;
+      }
+      if (maxCombo > 1) {
+        scoreEl.textContent += ` | Max Combo: ×${maxCombo}`;
+      }
+      scoreEl.style.transition = 'opacity 400ms ease, transform 400ms ease';
+      scoreEl.style.opacity = '1';
+      scoreEl.style.transform = 'translateY(0)';
+    }
+  }, scoreDelay);
+  
+  // 4. Enable clicking after all animations complete
+  const enableClickDelay = scoreDelay + 600;
+  setTimeout(() => {
+    if (modal) {
+      modal.style.pointerEvents = 'auto';
+    }
+    // Show and animate play again button
+    if (playAgainBtn) {
+      playAgainBtn.style.transition = 'opacity 300ms ease, transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+      playAgainBtn.style.opacity = '1';
+      playAgainBtn.style.transform = 'scale(1)';
+      playAgainBtn.style.pointerEvents = 'auto';
+    }
+  }, enableClickDelay);
+  
   // trap focus inside the result modal for accessibility
   if (modal) trapFocus(modal);
 }
@@ -555,6 +772,7 @@ if (typeof module !== 'undefined' && module.exports) {
     resumeGame,
     updateHUD,
     calculateFinalScore,
+    resetBoardForNextRound,
     // expose internals for assertions
     _internals,
     restartGame,
@@ -585,6 +803,7 @@ if (typeof window !== 'undefined') {
   window.resumeGame = resumeGame;
   window.updateHUD = updateHUD;
   window.calculateFinalScore = calculateFinalScore;
+  window.resetBoardForNextRound = resetBoardForNextRound;
   window.restartGame = restartGame;
   window.setMismatchDelay = setMismatchDelay;
   window.getStarRating = getStarRating;

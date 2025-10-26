@@ -4,29 +4,69 @@ A playful, kid-friendly memory match game built with HTML, CSS and vanilla JavaS
 
 ## What it is
 
-Lucy’s Match is a simple memory card matching game using colorful emoji and fun visual effects. Players flip cards to find matching pairs. The game includes three difficulty levels and a star-based scoring system.
+Lucy's Match is a dynamic memory card matching game using colorful emoji and fun visual effects. Players flip cards to find matching pairs across multiple game modes. The game includes three difficulty levels, multiple game modes, and an engaging scoring system with combos and animations.
 
 ## Key features
 
-- 3 difficulty levels: Easy (8 cards), Medium (12 cards), Hard (16 cards)
-- Sweet, pastel UI and playful fonts
-- Flip animation, match pulse animation, and confetti explosion on matches
-- Star rating at the end based on number of misses
-- Simple, mobile-friendly layout
+### Game Modes
+- **Classic Mode** 🎯 — Relaxed, untimed play. Perfect your strategy!
+- **Timed Mode** ⏱️ — Complete as many boards as possible before time runs out! Choose from:
+  - ⏰ Quick (1 minute)
+  - ⏲️ Standard (2 minutes)
+  - ⏳ Marathon (3 minutes)
+- **Blitz Mode** ⚡ — Fast-paced 1-minute challenge with the clock ticking!
+
+### Difficulty Levels
+- Easy (8 cards) 🌱
+- Medium (12 cards) 🌿
+- Hard (16 cards) 🌳
+
+### Scoring & Progression
+- **Combo System** — Chain consecutive matches for massive score multipliers (up to 8x!)
+- **Continuous Challenge** (Timed Mode) — Boards automatically reset when completed; rack up multiple completions!
+- **Star Ratings** — Earn 1-3 stars based on performance:
+  - Classic/Blitz: Based on accuracy (fewer misses = more stars)
+  - Timed: Based on boards completed (5+ boards = 3 stars!)
+- **Score Breakdown** — Points from matches, combos, time bonuses, and board completion bonuses
+
+### Visual Polish
+- **Animated Result Screen** — Staggered animations reveal your stats in an exciting sequence
+- **Smart UI** — Play Again button hidden until animations complete (no accidental dismissals!)
+- **Time Selection Screen** — Each duration option has unique icons and idle animations
+- Sweet, pastel UI with playful fonts and smooth transitions
+- Flip animations, match pulse effects, and confetti explosions
+- Dark/Light theme toggle 🌙/🌞
+- Mobile-friendly responsive layout
 
 ## Play
 
-Open `index.html` in your browser. Select a difficulty and match all pairs. When you complete all pairs the result modal will appear showing your star rating.
+Open `index.html` in your browser:
+1. Select your game mode (Classic, Timed, or Blitz)
+2. For Timed mode, choose your duration (1-3 minutes)
+3. Select difficulty level (Easy, Medium, Hard)
+4. Match all pairs and watch your score soar!
+
+In Timed mode, completed boards automatically reset — see how many you can finish before time expires!
 
 ## Project structure
 
-- `index.html` — main page including styles and game board markup (contains the original inline script for the browser version).
-- `src/game.js` — extracted game logic used by automated tests (exports small hooks so it can be driven by tests).
-- `tests/game.test.js` — Jest/jsdom based test covering the easy-mode game completion.
-- `package.json` — test script + devDependencies (Jest, jsdom).
-- `LICENSE` — project license file.
+- `index.html` — main page including styles, game board markup, and inline script for browser play
+- `src/game.js` — extracted game logic with mode system, combo mechanics, and board reset functionality (exports hooks for testing)
+- `tests/` — Comprehensive Jest/jsdom test suites:
+  - `game.test.js` — Core game completion flow
+  - `game.additional.test.js` — Edge cases and card interactions
+  - `game.dom.test.js` — DOM updates and rendering
+  - `modes.test.js` — Multi-mode gameplay (Classic, Timed, Blitz)
+  - `hud-scoring.test.js` — HUD updates, combo system, scoring
+  - `timed-mode-challenge.test.js` — Continuous board reset and completion tracking
+  - `card-interaction.test.js` — Card flipping, matching, and lock behavior
+  - `ui-flow.test.js` — Modal flows and game state transitions
+  - `accessibility.test.js` — Focus management and ARIA attributes
+  - `theme.test.js` — Dark/Light theme persistence
+- `package.json` — test script + devDependencies (Jest, jsdom)
+- `LICENSE` — project license file
 
-Note: `index.html` still contains the browser-facing inline script. `src/game.js` is used by the test harness so tests can require and drive the logic in Node/jsdom.
+Note: `index.html` contains the browser-facing inline script. `src/game.js` is used by the test harness so tests can require and drive the logic in Node/jsdom.
 
 ## Development
 
@@ -47,15 +87,19 @@ Run tests:
 npm test
 ```
 
+All 56 tests across 10 test suites validate game modes, scoring, combos, board resets, accessibility, and UI flows.
+
 ## Notes
 
-- The test harness uses jsdom to create a DOM from `index.html` and the `src/game.js` module to drive game behavior. In the test environment, the confetti effect is a no-op and the mismatch timeout is shortened to keep tests fast.
-- If you'd like the `src/game.js` logic wired into the production `index.html` (to avoid duplication), I can refactor the page to import the module and keep a single source of truth.
+- The test harness uses jsdom to create a DOM from `index.html` and the `src/game.js` module to drive game behavior.
+- In the test environment, animations are skipped (confetti, result screen delays) and timeouts are shortened to keep tests fast.
+- The timed mode's continuous challenge feature resets the board automatically when all pairs are matched, allowing players to complete multiple boards within the time limit.
+- Custom time durations are stored and passed through the game initialization flow seamlessly.
 
 ## Contributing
 
-If you'd like more tests (edge cases, accessibility checks, visual regression), I can add them. Open a PR with changes or request features here.
+Feature requests and PRs welcome! The codebase is fully tested with Jest and ready for extension.
 
 ---
 
-Enjoy playing and testing Lucy's Match!
+Enjoy playing and testing Lucy's Match! 🎮✨

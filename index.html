@@ -310,6 +310,17 @@
     }
     #resultModal .modal-content h2 {
       color: var(--accent);
+      will-change: opacity, transform;
+    }
+    #resultModal .modal-content .final-score {
+      will-change: opacity, transform;
+    }
+    #resultModal .modal-content #starResult {
+      will-change: opacity;
+    }
+    #resultModal .modal-content #starResult .star {
+      will-change: opacity, transform;
+      display: inline-block;
     }
     #resultModal .modal-content button {
       margin-top: 20px;
@@ -830,6 +841,138 @@
       opacity: 0.85;
     }
     
+    /* Time Selection Screen */
+    .time-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10002;
+      background: rgba(0,0,0,0.5);
+    }
+    .time-content {
+      background: var(--modal-bg);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 30px 60px var(--modal-shadow);
+    }
+    .time-content h2 {
+      color: var(--accent);
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+    .time-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .time-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 32px;
+      border-radius: 16px;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+      min-width: 140px;
+      position: relative;
+      overflow: visible;
+    }
+    .time-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .time-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+    .quick-time-btn {
+      background: linear-gradient(135deg, #74b9ff, #a29bfe);
+      color: white;
+      animation: quickPulse 2s ease-in-out infinite;
+    }
+    .quick-time-btn .time-emoji {
+      animation: quickBounce 1.5s ease-in-out infinite;
+    }
+    .standard-time-btn {
+      background: linear-gradient(135deg, #55efc4, #00b894);
+      color: #2b2b2b;
+      animation: steadyGlow 3s ease-in-out infinite;
+    }
+    .standard-time-btn .time-emoji {
+      animation: steadyRotate 4s linear infinite;
+      transform-origin: center;
+      display: inline-block;
+    }
+    .marathon-time-btn {
+      background: linear-gradient(135deg, #fdcb6e, #e17055);
+      color: white;
+      animation: sandFlow 3s ease-in-out infinite;
+    }
+    .marathon-time-btn .time-emoji {
+      animation: sandFlip 3s ease-in-out infinite;
+      transform-origin: center;
+      display: inline-block;
+    }
+    .time-emoji {
+      font-size: 48px;
+      margin-bottom: 4px;
+    }
+    .time-name {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .time-desc {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    /* Time button animations */
+    @keyframes quickPulse {
+      0%, 100% { 
+        box-shadow: 0 4px 15px rgba(116, 185, 255, 0.4);
+      }
+      50% { 
+        box-shadow: 0 4px 25px rgba(162, 155, 254, 0.6),
+                    0 0 30px rgba(116, 185, 255, 0.3);
+      }
+    }
+    @keyframes quickBounce {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes steadyGlow {
+      0%, 100% { 
+        box-shadow: 0 4px 15px rgba(85, 239, 196, 0.4);
+      }
+      50% { 
+        box-shadow: 0 4px 25px rgba(0, 184, 148, 0.6),
+                    0 0 35px rgba(85, 239, 196, 0.4);
+      }
+    }
+    @keyframes steadyRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes sandFlow {
+      0%, 100% { 
+        box-shadow: 0 4px 15px rgba(253, 203, 110, 0.4);
+      }
+      50% { 
+        box-shadow: 0 4px 25px rgba(225, 112, 85, 0.6),
+                    0 0 35px rgba(253, 203, 110, 0.4);
+      }
+    }
+    @keyframes sandFlip {
+      0%, 45%, 55%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+    }
+    
     /* Mobile responsive adjustments */
     @media (max-width: 600px) {
       .game-hud {
@@ -950,12 +1093,36 @@
         <button class="mode-btn timed-btn" data-mode="timed">
           <span class="mode-emoji">⏱️</span>
           <span class="mode-name">Timed</span>
-          <span class="mode-desc">2 minutes!</span>
+          <span class="mode-desc">Complete boards!</span>
         </button>
         <button class="mode-btn blitz-btn" data-mode="blitz">
           <span class="mode-emoji">⚡</span>
           <span class="mode-name">Blitz</span>
           <span class="mode-desc">1 minute!</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time selection screen for Timed mode -->
+  <div class="time-screen" id="timeScreen" style="display: none;">
+    <div class="time-content">
+      <h2>⏱️ Choose Your Challenge</h2>
+      <div class="time-buttons">
+        <button class="time-btn quick-time-btn" data-duration="60">
+          <span class="time-emoji">⏰</span>
+          <span class="time-name">Quick</span>
+          <span class="time-desc">1 Minute</span>
+        </button>
+        <button class="time-btn standard-time-btn" data-duration="120">
+          <span class="time-emoji">⏲️</span>
+          <span class="time-name">Standard</span>
+          <span class="time-desc">2 Minutes</span>
+        </button>
+        <button class="time-btn marathon-time-btn" data-duration="180">
+          <span class="time-emoji">⏳</span>
+          <span class="time-name">Marathon</span>
+          <span class="time-desc">3 Minutes</span>
         </button>
       </div>
     </div>
@@ -1014,11 +1181,33 @@
     }
 
     // Mode selection buttons
+    const timeScreen = document.getElementById('timeScreen');
+    let selectedTimeDuration = 120; // Default 2 minutes
+    
     const modeButtons = document.querySelectorAll('.mode-btn');
     modeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         selectedMode = btn.dataset.mode;
         modeScreen.style.display = 'none';
+        
+        // If timed mode, show time selection screen
+        if (selectedMode === 'timed') {
+          timeScreen.style.display = 'flex';
+          if (typeof trapFocus === 'function') trapFocus(timeScreen);
+        } else {
+          // For classic and blitz, go straight to difficulty
+          startModal.style.display = 'flex';
+          if (typeof trapFocus === 'function') trapFocus(startModal);
+        }
+      });
+    });
+
+    // Time selection buttons (for timed mode)
+    const timeButtons = document.querySelectorAll('.time-btn');
+    timeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedTimeDuration = parseInt(btn.dataset.duration);
+        timeScreen.style.display = 'none';
         startModal.style.display = 'flex';
         if (typeof trapFocus === 'function') trapFocus(startModal);
       });
@@ -1026,17 +1215,17 @@
 
     // Wire difficulty buttons with mode selection
     document.getElementById('easyBtn').addEventListener('click', () => { 
-      startGame(8, selectedMode);
+      startGame(8, selectedMode, selectedMode === 'timed' ? selectedTimeDuration : null);
       startModal.style.display = 'none';
       showHUD(selectedMode);
     });
     document.getElementById('mediumBtn').addEventListener('click', () => { 
-      startGame(12, selectedMode);
+      startGame(12, selectedMode, selectedMode === 'timed' ? selectedTimeDuration : null);
       startModal.style.display = 'none';
       showHUD(selectedMode);
     });
     document.getElementById('hardBtn').addEventListener('click', () => { 
-      startGame(16, selectedMode);
+      startGame(16, selectedMode, selectedMode === 'timed' ? selectedTimeDuration : null);
       startModal.style.display = 'none';
       showHUD(selectedMode);
     });
