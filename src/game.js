@@ -203,18 +203,30 @@ function applyTheme(theme) {
     '--bg-start': '#0f1724',
     '--bg-end': '#071124',
     '--accent': '#7dd3fc',
+    '--text': '#e6eef8',
+    '--text-secondary': '#b0c4de',
     '--card-front-start': '#1f3a52',
     '--card-front-end': '#183247',
     '--card-back-start': '#223b44',
-    '--card-back-end': '#183036'
+    '--card-back-end': '#183036',
+    '--modal-bg-start': '#1a2332',
+    '--modal-bg-end': '#0f1724',
+    '--button-bg-start': '#2a3f5f',
+    '--button-bg-end': '#1e2f47'
   } : {
     '--bg-start': '#fffaf0',
     '--bg-end': '#fef6f7',
     '--accent': '#ff6b81',
+    '--text': '#4a2b3b',
+    '--text-secondary': '#6b5563',
     '--card-front-start': '#b7f0e6',
     '--card-front-end': '#a3d2ca',
     '--card-back-start': '#ffd6e0',
-    '--card-back-end': '#ffb6b9'
+    '--card-back-end': '#ffb6b9',
+    '--modal-bg-start': '#ffffff',
+    '--modal-bg-end': '#fff6f9',
+    '--button-bg-start': '#ffd6e0',
+    '--button-bg-end': '#ffb6b9'
   };
   Object.keys(tokens).forEach(k => document.body.style.setProperty(k, tokens[k]));
   // animate transition: toggle a class that triggers a subtle gradient shift

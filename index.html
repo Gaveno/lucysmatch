@@ -23,16 +23,36 @@
       --bg-end: #fef6f7;
       --accent: #ff6b81;
       --text: #4a2b3b;
+      --text-secondary: #6b5563;
       --card-front: linear-gradient(180deg,#b7f0e6,#a3d2ca);
       --card-back: linear-gradient(180deg,#ffd6e0,#ffb6b9);
+      --modal-bg: linear-gradient(180deg,#ffffff,#fff6f9);
+      --modal-shadow: rgba(74,43,59,0.08);
+      --button-bg: linear-gradient(180deg,#ffd6e0,#ffb6b9);
+      --button-bg-alt: linear-gradient(180deg,#cde7f0,#9fd6ff);
+      --button-bg-hard: linear-gradient(180deg,#fff2b6,#ffd28f);
+      --card-border: rgba(74,43,59,0.08);
+      --card-shadow: rgba(75,0,60,0.06);
+      --title-gradient: linear-gradient(90deg,#ff85a1,#ffd28f,#8fd3ff);
+      --star-gradient: radial-gradient(circle at 30% 30%, #fffacd, #ffd700 40%, #ffb84d 70%);
     }
     [data-theme="dark"]{
       --bg-start: #0f1724;
       --bg-end: #071124;
       --accent: #7dd3fc;
       --text: #e6eef8;
+      --text-secondary: #b0c4de;
       --card-front: linear-gradient(180deg,#1f3a52,#183247);
       --card-back: linear-gradient(180deg,#223b44,#183036);
+      --modal-bg: linear-gradient(180deg,#1a2332,#0f1724);
+      --modal-shadow: rgba(0,0,0,0.4);
+      --button-bg: linear-gradient(180deg,#2a3f5f,#1e2f47);
+      --button-bg-alt: linear-gradient(180deg,#1f4662,#163854);
+      --button-bg-hard: linear-gradient(180deg,#4a5a2f,#3a4a25);
+      --card-border: rgba(125,211,252,0.15);
+      --card-shadow: rgba(0,0,0,0.3);
+      --title-gradient: linear-gradient(90deg,#7dd3fc,#93c5fd,#a5b4fc);
+      --star-gradient: radial-gradient(circle at 30% 30%, #ffd700, #ffb84d 40%, #ff8c42 70%);
     }
     html, body, .container { transition: background 420ms ease, color 320ms ease; }
     body { background: linear-gradient(180deg,var(--bg-start), var(--bg-end)); color: var(--text); }
@@ -56,9 +76,7 @@
     }
     body {
       font-family: 'Baloo 2', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(255,215,240,0.35), transparent 15%),
-                  radial-gradient(1000px 500px at 90% 90%, rgba(200,235,255,0.28), transparent 20%),
-                  linear-gradient(180deg, #fffaf0, #fef6f7);
+      background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
       display: flex;
       justify-content: center;
       align-items: center;
@@ -77,7 +95,7 @@
       font-size: 40px;
       letter-spacing: 1px;
       /* gradient text */
-      background: linear-gradient(90deg,#ff85a1,#ffd28f,#8fd3ff);
+      background: var(--title-gradient);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -90,19 +108,22 @@
     }
     /* Start modal styles */
     .start-modal{ position: fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:10001; background: rgba(0,0,0,0.35); }
-    .start-content{ background: linear-gradient(180deg,#fff,#fff8fb); padding:26px 28px; border-radius:12px; text-align:center;}
-    .start-content h2{font-size:26px;margin-bottom:12px;color:#ff6b81}
-    .start-content .options button{ margin:6px; padding:12px 16px; border-radius:10px; border:none; background:linear-gradient(180deg,#ffd6e0,#ffb6b9); font-size:16px; cursor:pointer}
-    .start-content .options button:nth-child(2){ background:linear-gradient(180deg,#cde7f0,#9fd6ff)}
-    .start-content .options button:nth-child(3){ background:linear-gradient(180deg,#fff2b6,#ffd28f)}
+    .start-content{ background: var(--modal-bg); padding:26px 28px; border-radius:12px; text-align:center; box-shadow: 0 30px 60px var(--modal-shadow);}
+    .start-content h2{font-size:26px;margin-bottom:12px;color:var(--accent)}
+    .start-content .options button{ margin:6px; padding:12px 16px; border-radius:10px; border:none; font-size:16px; cursor:pointer; color: var(--text); transition: transform 160ms ease, opacity 160ms ease;}
+    .start-content .options button:nth-child(1){ background:var(--button-bg)}
+    .start-content .options button:nth-child(2){ background:var(--button-bg-alt)}
+    .start-content .options button:nth-child(3){ background:var(--button-bg-hard)}
+    .start-content .options button:hover{ transform: translateY(-2px); opacity: 0.9; }
+    .start-content .options button:active{ transform: translateY(0); }
     .card {
-      background: var(--card-back);
+      background: transparent; /* no background on container, only on faces */
       border-radius: 14px;
       position: relative;
-  cursor: pointer;
+      cursor: pointer;
       perspective: 1000px;
-      box-shadow: 0 8px 18px rgba(75,0,60,0.06);
-      transition: transform 160ms ease;
+      box-shadow: 0 8px 18px var(--card-shadow);
+      transition: transform 160ms ease, box-shadow 160ms ease;
     }
     /* Screen-reader only helper */
     .sr-only {
@@ -149,13 +170,21 @@
     .card-front {
       background: var(--card-front); /* theme-aware */
       transform: rotateY(180deg);
-      border: 4px solid rgba(74,43,59,0.08);
-      color: #2b2b2b;
+      border: 4px solid var(--card-border);
+      color: var(--text);
     }
     .card-back {
-      background: linear-gradient(180deg,#ffd6e0,#ffb6b9); /* pastel pink */
-      color: #4a2b3b;
+      background: var(--card-back); /* pastel pink */
+      color: var(--text);
       font-size: 42px;
+      transform: rotateY(0deg);
+    }
+    /* Ensure proper visibility during flip */
+    .card:not(.flipped) .card-front {
+      visibility: hidden;
+    }
+    .card.flipped .card-back {
+      visibility: hidden;
     }
     /* New keyframes for match effect */
     @keyframes matchPulse {
@@ -197,7 +226,7 @@
     /* New styles for star icons in result modal */
     .star {
       font-size: 90px; /* bigger, more playful */
-      background: radial-gradient(circle at 30% 30%, #fffacd, #ffd700 40%, #ffb84d 70%);
+      background: var(--star-gradient);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -249,13 +278,35 @@
       opacity: 1;
     }
     #resultModal .modal-content {
-      background: linear-gradient(180deg,#ffffff,#fff6f9);
+      background: var(--modal-bg);
       padding: 44px 34px; /* larger modal */
       border-radius: 16px;
       text-align: center;
       min-width: 380px;
       min-height: 260px;
-      box-shadow: 0 30px 60px rgba(74,43,59,0.08);
+      box-shadow: 0 30px 60px var(--modal-shadow);
+    }
+    #resultModal .modal-content h2 {
+      color: var(--accent);
+    }
+    #resultModal .modal-content button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      background: var(--button-bg);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 160ms ease, opacity 160ms ease;
+    }
+    #resultModal .modal-content button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+    #resultModal .modal-content button:active {
+      transform: translateY(0);
     }
     /* Fun sparkle dots behind modal */
     #resultModal.show::before{
@@ -271,8 +322,27 @@
       transform: translateY(-10px);
     }
     /* Theme toggle button */
-    #themeToggle { position: fixed; right: 18px; top: 18px; z-index:11000; background:transparent; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:20px }
-    #themeToggle:focus { outline: 3px solid rgba(125,211,252,0.18); }
+    #themeToggle { 
+      position: fixed; 
+      right: 18px; 
+      top: 18px; 
+      z-index:11000; 
+      background: var(--button-bg); 
+      border: 2px solid var(--card-border); 
+      padding: 8px 10px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-size: 20px;
+      transition: transform 160ms ease, opacity 160ms ease;
+    }
+    #themeToggle:hover {
+      transform: scale(1.1);
+      opacity: 0.9;
+    }
+    #themeToggle:active {
+      transform: scale(0.95);
+    }
+    #themeToggle:focus { outline: 3px solid var(--accent); outline-offset: 2px; }
   </style>
 </head>
 <body>
