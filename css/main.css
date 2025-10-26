@@ -7,6 +7,8 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  /* Prevent double-tap zoom on touch devices */
+  touch-action: manipulation;
 }
 
 html, body {
@@ -28,6 +30,11 @@ body {
   align-items: center;
   height: 100vh;
   color: var(--text);
+  /* Additional zoom prevention */
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 .container {
