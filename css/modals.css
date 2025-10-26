@@ -1,0 +1,529 @@
+/* ==========================================================================
+   MODALS.CSS - Modal dialogs and screens
+   ========================================================================== */
+
+/* Title/Splash Screen */
+.title-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10003;
+  background: linear-gradient(135deg, var(--bg-start), var(--accent), var(--bg-end));
+  cursor: pointer;
+  animation: gradientShift 6s ease infinite;
+}
+
+.title-content {
+  text-align: center;
+  animation: titleBounce 2s ease-in-out infinite;
+}
+
+.big-title {
+  font-size: 64px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  margin-bottom: 20px;
+  letter-spacing: 3px;
+}
+
+.subtitle {
+  font-size: 28px;
+  color: white;
+  margin-bottom: 40px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.tap-prompt {
+  font-size: 20px;
+  color: white;
+  animation: pulse 1.5s ease-in-out infinite;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Mode Selection Screen */
+.mode-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  background: rgba(0,0,0,0.5);
+}
+
+.mode-content {
+  background: var(--modal-bg);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 30px 60px var(--modal-shadow);
+}
+
+.mode-content h2 {
+  color: var(--accent);
+  font-size: 32px;
+  margin-bottom: 30px;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 32px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  min-width: 140px;
+}
+
+.mode-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.mode-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.classic-btn {
+  background: linear-gradient(135deg, #7bed9f, #55efc4);
+  color: #2b2b2b;
+  animation: peacefulGlow 4s ease-in-out infinite;
+  position: relative;
+  overflow: visible;
+}
+
+.classic-btn .mode-emoji {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+.timed-btn {
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  color: #2b2b2b;
+  animation: urgentPulse 1.5s ease-in-out infinite;
+  position: relative;
+  overflow: visible;
+}
+
+.timed-btn .mode-emoji {
+  animation: clockTick 2s ease-in-out infinite;
+  transform-origin: center;
+  display: inline-block;
+}
+
+.blitz-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  color: white;
+  animation: lightningFlash 3s ease-in-out infinite;
+  position: relative;
+  overflow: visible;
+}
+
+.blitz-btn::before {
+  content: '⚡';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  font-size: 60px;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.9));
+  pointer-events: none;
+  animation: lightningStrike 3s ease-in-out infinite;
+  z-index: 10;
+}
+
+.blitz-btn .mode-emoji {
+  animation: rapidBounce 0.8s ease-in-out infinite, lightningPulse 1.5s ease-in-out infinite;
+}
+
+.mode-emoji {
+  font-size: 48px;
+  margin-bottom: 4px;
+}
+
+.mode-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.mode-desc {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Time Selection Screen */
+.time-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10002;
+  background: rgba(0,0,0,0.5);
+}
+
+.time-content {
+  background: var(--modal-bg);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 30px 60px var(--modal-shadow);
+}
+
+.time-content h2 {
+  color: var(--accent);
+  font-size: 32px;
+  margin-bottom: 30px;
+}
+
+.time-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.time-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 32px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  min-width: 140px;
+  position: relative;
+  overflow: visible;
+}
+
+.time-btn:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.time-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.quick-time-btn {
+  background: linear-gradient(135deg, #74b9ff, #a29bfe);
+  color: white;
+  animation: quickPulse 2s ease-in-out infinite;
+}
+
+.quick-time-btn .time-emoji {
+  animation: quickBounce 1.5s ease-in-out infinite;
+}
+
+.standard-time-btn {
+  background: linear-gradient(135deg, #55efc4, #00b894);
+  color: #2b2b2b;
+  animation: steadyGlow 3s ease-in-out infinite;
+}
+
+.standard-time-btn .time-emoji {
+  animation: steadyRotate 4s linear infinite;
+  transform-origin: center;
+  display: inline-block;
+}
+
+.marathon-time-btn {
+  background: linear-gradient(135deg, #fdcb6e, #e17055);
+  color: white;
+  animation: sandFlow 3s ease-in-out infinite;
+}
+
+.marathon-time-btn .time-emoji {
+  animation: sandFlip 3s ease-in-out infinite;
+  transform-origin: center;
+  display: inline-block;
+}
+
+.time-emoji {
+  font-size: 48px;
+  margin-bottom: 4px;
+}
+
+.time-name {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.time-desc {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Start modal (difficulty selection) */
+.start-modal{ 
+  position: fixed; 
+  inset: 0; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  z-index: 10001; 
+  background: rgba(0,0,0,0.5); 
+}
+
+.start-content{ 
+  background: var(--modal-bg); 
+  padding: 36px 32px; 
+  border-radius: 16px; 
+  text-align: center; 
+  box-shadow: 0 30px 60px var(--modal-shadow);
+}
+
+.start-content h2{
+  font-size: 28px;
+  margin-bottom: 24px;
+  color: var(--accent);
+}
+
+.start-content .options{ 
+  display: flex; 
+  gap: 12px; 
+  flex-wrap: wrap; 
+  justify-content: center;
+}
+
+/* Difficulty buttons */
+.difficulty-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 8px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 160ms ease, opacity 160ms ease;
+  min-width: 100px;
+}
+
+.difficulty-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  opacity: 0.95;
+}
+
+.difficulty-btn:active {
+  transform: translateY(0);
+}
+
+.easy-btn {
+  background: linear-gradient(135deg, #b8e994, #78e08f);
+  color: #2b2b2b;
+}
+
+.medium-btn {
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  color: #2b2b2b;
+}
+
+.hard-btn {
+  background: linear-gradient(135deg, #ff7675, #d63031);
+  color: white;
+}
+
+.diff-emoji {
+  font-size: 36px;
+}
+
+.diff-name {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.diff-count {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* Result Modal */
+#resultModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 10000;
+}
+
+#resultModal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+#resultModal .modal-content {
+  background: var(--modal-bg);
+  padding: 44px 34px;
+  border-radius: 16px;
+  text-align: center;
+  min-width: 380px;
+  min-height: 260px;
+  box-shadow: 0 30px 60px var(--modal-shadow);
+}
+
+#resultModal .modal-content h2 {
+  color: var(--accent);
+  will-change: opacity, transform;
+}
+
+#resultModal .modal-content .final-score {
+  will-change: opacity, transform;
+}
+
+#resultModal .modal-content #starResult {
+  will-change: opacity;
+}
+
+#resultModal .modal-content #starResult .star {
+  will-change: opacity, transform;
+  display: inline-block;
+}
+
+#resultModal .modal-content button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  background: var(--button-bg);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+#resultModal .modal-content button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+#resultModal .modal-content button:active {
+  transform: translateY(0);
+}
+
+/* Fun sparkle dots behind modal */
+#resultModal.show::before{
+  content: '';
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle at 20% 20%, rgba(255,223,186,0.6), transparent 15%),
+              radial-gradient(circle at 80% 80%, rgba(199,245,255,0.6), transparent 15%);
+  border-radius: 50%;
+  filter: blur(26px);
+  z-index: 9998;
+  transform: translateY(-10px);
+}
+
+/* Final score display */
+.final-score {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 12px 0;
+}
+
+/* Star icons in result modal */
+.star {
+  font-size: 90px;
+  background: var(--star-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 8px 18px rgba(255,150,100,0.12);
+  margin: 0 14px;
+  opacity: 0;
+  animation: fadeIn 0.45s forwards, breathe 2s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center center;
+}
+
+/* Stamp entrance for stars */
+.star.stamp {
+  animation: stampIn 360ms cubic-bezier(.2,.9,.3,1) both;
+  display: inline-block;
+}
+
+/* Mode selector in start modal */
+.mode-select {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+.mode-select label {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.mode-select select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 2px solid var(--card-border);
+  background: var(--modal-bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .big-title {
+    font-size: 42px;
+  }
+  .subtitle {
+    font-size: 22px;
+  }
+  .mode-buttons {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .mode-btn {
+    width: 100%;
+    max-width: 280px;
+  }
+  .mode-content {
+    padding: 28px 20px;
+    margin: 0 16px;
+  }
+  .mode-content h2 {
+    font-size: 26px;
+  }
+  .start-content {
+    margin: 0 16px;
+    padding: 28px 20px;
+  }
+  .difficulty-btn {
+    min-width: 90px;
+    padding: 18px 20px;
+  }
+}

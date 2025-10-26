@@ -73,7 +73,12 @@ In Timed mode, completed boards automatically reset — see how many you can fin
 ## Project structure
 
 - `index.html` — main page including styles, game board markup, and inline script for browser play
+- `css/` — Stylesheets ⚠️ **Refactoring in progress** (see [ARCHITECTURE.md](ARCHITECTURE.md))
+  - `themes.css` — Theme variables and transitions (light/dark mode) ✅
+  - `main.css` — Base styles, layout, game board, cards ✅
+  - Additional CSS files to be extracted from index.html
 - `src/game.js` — extracted game logic with mode system, combo mechanics, and board reset functionality (exports hooks for testing)
+- `src/ui.js` — ⚠️ **Planned**: UI initialization and event handlers (to be extracted from inline scripts)
 - `tests/` — Comprehensive Jest/jsdom test suites:
   - `game.test.js` — Core game completion flow
   - `game.additional.test.js` — Edge cases and card interactions
@@ -87,8 +92,9 @@ In Timed mode, completed boards automatically reset — see how many you can fin
   - `theme.test.js` — Dark/Light theme persistence
 - `package.json` — test script + devDependencies (Jest, jsdom)
 - `LICENSE` — project license file
+- `ARCHITECTURE.md` — 📋 **Coding guidelines and best practices** for future development
 
-Note: `index.html` contains the browser-facing inline script. `src/game.js` is used by the test harness so tests can require and drive the logic in Node/jsdom.
+**Note**: The project is undergoing refactoring to separate CSS and JavaScript into external files for better maintainability. See [ARCHITECTURE.md](ARCHITECTURE.md) for the complete plan and coding standards.
 
 ## Development
 

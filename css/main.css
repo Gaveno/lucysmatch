@@ -1,0 +1,99 @@
+/* ==========================================================================
+   MAIN.CSS - Base styles, layout, and game board
+   ========================================================================== */
+
+/* CSS Reset and Base Styles */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  /* Disable scrolling to prevent accidental scroll gestures on touch screens */
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+}
+
+body {
+  font-family: 'Baloo 2', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: var(--text);
+}
+
+.container {
+  max-width: 600px;
+  width: 100%;
+  margin: auto;
+  padding-top: 0;
+  position: relative;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--accent);
+  font-size: 40px;
+  letter-spacing: 1px;
+  /* gradient text */
+  background: var(--title-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 2px 6px rgba(255,107,129,0.08);
+  position: relative;
+  z-index: 999;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Blitz mode: Scale to fit 5 rows vertically */
+.game-board.blitz-mode {
+  max-height: calc(100vh - 180px); /* Account for HUD and padding */
+  width: auto;
+  aspect-ratio: 4 / 5; /* 4 columns, 5 rows */
+  max-width: min(600px, calc((100vh - 180px) * 0.8));
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .card {
+    min-height: 72px;
+  }
+  
+  .card-front, .card-back {
+    font-size: 40px;
+  }
+  
+  .mode-btn {
+    min-width: 140px;
+    font-size: 16px;
+  }
+  
+  h1 {
+    font-size: 32px;
+  }
+  
+  .title {
+    font-size: 54px;
+  }
+  
+  .subtitle {
+    font-size: 24px;
+  }
+}

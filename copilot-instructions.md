@@ -2,6 +2,29 @@
 
 This file documents a compact development workflow and rules to follow when adding or modifying features in this repository. The goal: every code change should include tests, and tests must be run and pass before committing.
 
+## Project Structure
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the complete project structure and coding guidelines. Key points:
+
+### File Organization
+- `index.html` - Main application file (HTML structure only, NO inline CSS or JavaScript)
+- `css/` - All stylesheets organized by concern:
+  - `themes.css` - Theme variables and dark mode
+  - `main.css` - Base styles, layout, game board
+  - `cards.css` - Card styles and flip animations
+  - `hud.css` - Heads-up display and controls
+  - `modals.css` - All modal dialogs and screens
+  - `animations.css` - All @keyframes animations
+- `src/` - JavaScript modules:
+  - `game.js` - Core game logic and state management
+- `tests/` - Jest test suites
+
+### Architecture Principles
+1. **Separation of Concerns**: Keep CSS, HTML, and JavaScript in separate files
+2. **Modular CSS**: Each CSS file handles a specific aspect of the UI
+3. **No Inline Styles**: All styling must be in external CSS files
+4. **Testable Code**: Keep game logic in `src/game.js` for easy testing
+
 ## Core rules
 
 1. Always add tests for new behavior
@@ -22,9 +45,19 @@ This file documents a compact development workflow and rules to follow when addi
 
 4. Update documentation where appropriate
    - If you add features or commands, update `README.md` and `TESTS.md` with concise instructions so others can run and verify the change.
+   - Follow the structure defined in `ARCHITECTURE.md` for new files and features.
 
 5. Commit all modified files together
    - When your changes are ready and tests pass, commit all modified and new files in a single commit. This ensures the repository remains consistent on the main branch.
+
+6. Follow the established architecture
+   - New CSS goes in the appropriate file in `css/` directory
+   - New animations go in `css/animations.css`
+   - New modal styles go in `css/modals.css`
+   - Card-related styles go in `css/cards.css`
+   - HUD/UI controls go in `css/hud.css`
+   - Theme changes go in `css/themes.css`
+   - NO inline styles or scripts in `index.html`
 
 ## Commit message guidance
 

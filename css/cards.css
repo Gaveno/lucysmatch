@@ -1,0 +1,129 @@
+/* ==========================================================================
+   CARDS.CSS - Card styles and flip animations
+   ========================================================================== */
+
+.card {
+  background: transparent; /* no background on container, only on faces */
+  border-radius: 14px;
+  position: relative;
+  cursor: pointer;
+  perspective: 1000px;
+  box-shadow: 0 8px 18px var(--card-shadow);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.card:active { 
+  transform: translateY(2px) scale(0.995); 
+}
+
+.card:hover { 
+  transform: translateY(-6px) scale(1.02); 
+}
+
+.card.matched {
+  animation: matchPulse 0.5s ease-in-out;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  padding-top: 100%; /* square aspect ratio */
+  transition: transform 0.5s cubic-bezier(.2,.9,.3,1);
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front, .card-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px; /* bigger for kids */
+  font-weight: 700;
+}
+
+.card-front {
+  background: var(--card-front); /* theme-aware */
+  transform: rotateY(180deg);
+  border: 4px solid var(--card-border);
+  color: var(--text);
+}
+
+.card-back {
+  background: var(--card-back); /* pastel pink */
+  color: var(--text);
+  font-size: 42px;
+  transform: rotateY(0deg);
+}
+
+/* Ensure proper visibility during flip */
+.card:not(.flipped) .card-front {
+  visibility: hidden;
+}
+
+.card.flipped .card-back {
+  visibility: hidden;
+}
+
+/* Blitz Mode: Pair Hint Effects */
+.card.pair-hint-1 {
+  box-shadow: 0 0 0 3px rgba(255, 107, 129, 0.6), 
+              0 0 20px rgba(255, 107, 129, 0.4);
+  animation: hintGlow1 2s ease-in-out infinite;
+}
+
+.card.pair-hint-2 {
+  box-shadow: 0 0 0 3px rgba(135, 206, 250, 0.6),
+              0 0 20px rgba(135, 206, 250, 0.4);
+  animation: hintPulse2 2.5s ease-in-out infinite;
+}
+
+.card.pair-hint-3 {
+  box-shadow: 0 0 0 3px rgba(152, 251, 152, 0.6),
+              0 0 20px rgba(152, 251, 152, 0.4);
+  animation: hintShimmer3 3s ease-in-out infinite;
+}
+
+.card.pair-hint-4 {
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.6),
+              0 0 20px rgba(255, 215, 0, 0.4);
+  animation: hintWave4 2.2s ease-in-out infinite;
+}
+
+.card.pair-hint-5 {
+  box-shadow: 0 0 0 3px rgba(186, 85, 211, 0.6),
+              0 0 20px rgba(186, 85, 211, 0.4);
+  animation: hintSpark5 2.8s ease-in-out infinite;
+}
+
+/* Screen-reader only helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Larger touch targets for mobile */
+@media (max-width: 600px) {
+  .card { 
+    min-height: 72px; 
+  }
+  .card-front, .card-back { 
+    font-size: 40px; 
+  }
+}

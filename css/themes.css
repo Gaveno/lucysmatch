@@ -1,0 +1,72 @@
+/* Theme Variables and Transitions */
+
+/* Light Theme (Default) */
+:root {
+  --bg-start: #fffaf0;
+  --bg-end: #fef6f7;
+  --accent: #ff6b81;
+  --text: #4a2b3b;
+  --text-secondary: #6b5563;
+  --card-front: linear-gradient(180deg, #b7f0e6, #a3d2ca);
+  --card-back: linear-gradient(180deg, #ffd6e0, #ffb6b9);
+  --modal-bg: linear-gradient(180deg, #ffffff, #fff6f9);
+  --modal-shadow: rgba(74, 43, 59, 0.08);
+  --button-bg: linear-gradient(180deg, #ffd6e0, #ffb6b9);
+  --button-bg-alt: linear-gradient(180deg, #cde7f0, #9fd6ff);
+  --button-bg-hard: linear-gradient(180deg, #fff2b6, #ffd28f);
+  --card-border: rgba(74, 43, 59, 0.08);
+  --card-shadow: rgba(75, 0, 60, 0.06);
+  --title-gradient: linear-gradient(90deg, #ff85a1, #ffd28f, #8fd3ff);
+  --star-gradient: radial-gradient(circle at 30% 30%, #fffacd, #ffd700 40%, #ffb84d 70%);
+  
+  /* Legacy pastel variables */
+  --pastel-1: #ffd6e0;
+  --pastel-2: #cde7f0;
+  --pastel-3: #f9e79f;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --bg-start: #0f1724;
+  --bg-end: #071124;
+  --accent: #7dd3fc;
+  --text: #e6eef8;
+  --text-secondary: #b0c4de;
+  --card-front: linear-gradient(180deg, #1f3a52, #183247);
+  --card-back: linear-gradient(180deg, #223b44, #183036);
+  --modal-bg: linear-gradient(180deg, #1a2332, #0f1724);
+  --modal-shadow: rgba(0, 0, 0, 0.4);
+  --button-bg: linear-gradient(180deg, #2a3f5f, #1e2f47);
+  --button-bg-alt: linear-gradient(180deg, #1f4662, #163854);
+  --button-bg-hard: linear-gradient(180deg, #4a5a2f, #3a4a25);
+  --card-border: rgba(125, 211, 252, 0.15);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --title-gradient: linear-gradient(90deg, #7dd3fc, #93c5fd, #a5b4fc);
+  --star-gradient: radial-gradient(circle at 30% 30%, #ffd700, #ffb84d 40%, #ff8c42 70%);
+}
+
+/* Theme Transition Animations */
+html, body, .container { 
+  transition: background 420ms ease, color 320ms ease; 
+}
+
+/* Subtle animated gradient shift during theme change */
+body.theme-animate { 
+  transition: background 900ms ease-in-out; 
+}
+
+body.theme-animate::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(255,255,255,0.06), rgba(0,0,0,0.04));
+  mix-blend-mode: overlay;
+  animation: themePulse 900ms ease-in-out;
+}
+
+@keyframes themePulse {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}

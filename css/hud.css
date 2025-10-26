@@ -1,0 +1,187 @@
+/* ==========================================================================
+   HUD.CSS - Heads-up display and game controls
+   ========================================================================== */
+
+/* Game HUD */
+.game-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  padding: 0 20px;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.game-hud.active {
+  opacity: 1;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--modal-bg);
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px var(--modal-shadow);
+  pointer-events: auto;
+}
+
+.hud-item.score-item {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+}
+
+.hud-item.timer-item {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  display: none;
+}
+
+.hud-item.timer-item.active {
+  display: flex;
+}
+
+.hud-item.combo-item {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: start;
+  margin-top: 8px;
+  background: transparent;
+  box-shadow: none;
+  padding: 4px 8px;
+}
+
+.hud-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hud-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.hud-combo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 200ms ease;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.timer-item {
+  display: none;
+}
+
+.timer-item.active {
+  display: flex;
+}
+
+/* Combo popup animation */
+.combo-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--accent);
+  z-index: 10002;
+  pointer-events: none;
+  animation: comboPopup 1s ease-out forwards;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Theme toggle button */
+#themeToggle { 
+  position: fixed; 
+  right: 18px; 
+  top: 18px; 
+  z-index: 11000; 
+  background: var(--button-bg); 
+  border: 2px solid var(--card-border); 
+  padding: 8px 10px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  font-size: 20px;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+#themeToggle:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+#themeToggle:active {
+  transform: scale(0.95);
+}
+
+#themeToggle:focus { 
+  outline: 3px solid var(--accent); 
+  outline-offset: 2px; 
+}
+
+/* Confetti container */
+#confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  background-color: red;
+  opacity: 0.95;
+  animation: confettiExplosion 2.2s cubic-bezier(.1,.8,.2,1) forwards;
+  transform-origin: center;
+  border-radius: 3px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+  .game-hud {
+    padding: 0 10px;
+    max-width: 100%;
+    top: 20px;
+    padding: 8px 16px;
+    gap: 12px;
+  }
+  .hud-item {
+    padding: 8px 12px;
+  }
+  .hud-value {
+    font-size: 18px;
+  }
+  .hud-label {
+    font-size: 11px;
+  }
+  .hud-combo {
+    font-size: 16px;
+  }
+}
